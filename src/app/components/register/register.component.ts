@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { FormBuilder, Validators, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, Validators, ReactiveFormsModule, FormGroup } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { RegisterForm } from '../../models/auth.model';
@@ -12,21 +12,7 @@ import { RegisterForm } from '../../models/auth.model';
   styleUrls: ['./register.component.css']
 })
 export class RegisterComponent {
-  registerForm = this.fb.group({
-    email: ['', [Validators.required, Validators.email]],
-    password: ['', [Validators.required, Validators.minLength(6)]],
-    confirmPassword: ['', Validators.required],
-    firstName: ['', Validators.required],
-    lastName: ['', Validators.required],
-    address: this.fb.group({
-      street: ['', Validators.required],
-      city: ['', Validators.required],
-      zipCode: ['', Validators.required]
-    }),
-    phoneNumber: ['', Validators.required],
-    dateOfBirth: ['', Validators.required],
-    profilePicture: ['']
-  });
+  registerForm: FormGroup;
 
   errorMessage = '';
   successMessage = '';
@@ -34,7 +20,23 @@ export class RegisterComponent {
   constructor(
     private fb: FormBuilder,
     private authService: AuthService
-  ) {}
+  ) {
+    this.registerForm = this.fb.group({
+      email: ['', [Validators.required, Validators.email]],
+      password: ['', [Validators.required, Validators.minLength(6)]],
+      confirmPassword: ['', Validators.required],
+      firstName: ['', Validators.required],
+      lastName: ['', Validators.required],
+      address: this.fb.group({
+        street: ['', Validators.required],
+        city: ['', Validators.required],
+        zipCode: ['', Validators.required]
+      }),
+      phoneNumber: ['', Validators.required],
+      dateOfBirth: ['', Validators.required],
+      profilePicture: ['']
+    });
+  }
 
   onSubmit() {
     if (this.registerForm.invalid) return;

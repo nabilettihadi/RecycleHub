@@ -12,7 +12,7 @@ export class AuthEffects {
     this.actions$.pipe(
       ofType(AuthActions.login),
       mergeMap(({ email, password }) =>
-        this.authService.login(email, password).pipe(
+        this.authService.login({ email, password }).pipe(
           map(user => AuthActions.loginSuccess({ user })),
           catchError(error => of(AuthActions.loginFailure({ error: error.message })))
         )
@@ -33,7 +33,7 @@ export class AuthEffects {
     this.actions$.pipe(
       ofType(AuthActions.register),
       mergeMap(({ user }) =>
-        this.authService.register(user).pipe(
+        this.authService.register({ ...user, confirmPassword: user.password }).pipe(
           map(newUser => AuthActions.registerSuccess({ user: newUser })),
           catchError(error => of(AuthActions.registerFailure({ error: error.message })))
         )
@@ -53,8 +53,8 @@ export class AuthEffects {
   updateProfile$ = createEffect(() =>
     this.actions$.pipe(
       ofType(AuthActions.updateProfile),
-      mergeMap(({ user }) =>
-        this.authService.updateProfile(user).pipe(
+      mergeMap(({ userId, userData }) =>
+        this.authService.updateProfile(userId, userData).pipe(
           map(updatedUser => AuthActions.updateProfileSuccess({ user: updatedUser })),
           catchError(error => of(AuthActions.updateProfileFailure({ error: error.message })))
         )

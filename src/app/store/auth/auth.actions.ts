@@ -36,7 +36,7 @@ export const registerFailure = createAction(
 // Update Profile Actions
 export const updateProfile = createAction(
   '[Auth] Update Profile',
-  props<{ user: Partial<User> }>()
+  props<{ userId: string; userData: Partial<User> }>()
 );
 
 export const updateProfileSuccess = createAction(

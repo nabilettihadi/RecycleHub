@@ -1,0 +1,54 @@
+<div class="container mt-5">
+  <div class="row justify-content-center">
+    <div class="col-md-8">
+      <div class="card">
+        <div class="card-header">Modifier mon profil</div>
+        <div class="card-body">
+          <form [formGroup]="profileForm" (ngSubmit)="onSubmit()">
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label class="form-label">Prénom</label>
+                <input type="text" class="form-control" formControlName="firstName">
+                <div *ngIf="profileForm.get('firstName')?.invalid && profileForm.get('firstName')?.touched" class="text-danger">
+                  Le prénom est requis
+                </div>
+              </div>
+              <div class="col-md-6 mb-3">
+                <label class="form-label">Nom</label>
+                <input type="text" class="form-control" formControlName="lastName">
+                <div *ngIf="profileForm.get('lastName')?.invalid && profileForm.get('lastName')?.touched" class="text-danger">
+                  Le nom est requis
+                </div>
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label">Adresse</label>
+              <textarea class="form-control" formControlName="address" rows="2"></textarea>
+              <div *ngIf="profileForm.get('address')?.invalid && profileForm.get('address')?.touched" class="text-danger">
+                L'adresse est requise
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label">Téléphone</label>
+              <input type="tel" class="form-control" formControlName="phone">
+              <div *ngIf="profileForm.get('phone')?.errors?.['pattern']" class="text-danger">
+                Format téléphone marocain invalide (ex: 0612345678)
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label">Date de naissance</label>
+              <input type="date" class="form-control" formControlName="birthDate">
+            </div>
+
+            <button type="submit" class="btn btn-primary" [disabled]="!profileForm.valid">
+              Enregistrer les modifications
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

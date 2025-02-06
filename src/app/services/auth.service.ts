@@ -105,6 +105,18 @@ export class AuthService {
     return of(updatedUser);
   }
 
+  updateUser(updatedUser: User): boolean {
+    const users = this.getUsers();
+    const index = users.findIndex(u => u.email === updatedUser.email);
+    if (index === -1) return false;
+    
+    users[index] = updatedUser;
+    localStorage.setItem(this.USERS_KEY, JSON.stringify(users));
+    this.currentUser = updatedUser;
+    localStorage.setItem('currentUser', JSON.stringify(updatedUser));
+    return true;
+  }
+
   deleteAccount(userId: string): Observable<void> {
     const users = this.getUsers();
     const userIndex = users.findIndex(u => u.id === userId);

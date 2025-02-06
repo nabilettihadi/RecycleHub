@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { of } from 'rxjs';
 import { map, mergeMap, catchError, tap } from 'rxjs/operators';
@@ -8,6 +8,31 @@ import { AuthService } from '../../services/auth.service';
 
 @Injectable()
 export class AuthEffects {
+  private actions$ = inject(Actions);
+  private authService = inject(AuthService);
+  private router = inject(Router);
+
+  register$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(AuthActions.register),
+      mergeMap(({ user }) =>
+        this.authService.register(user).pipe(
+          map(registeredUser => AuthActions.registerSuccess({ user: registeredUser })),
+          catchError(error => of(AuthActions.registerFailure({ error: error.message })))
+        )
+      )
+    )
+  );
+
+  registerSuccess$ = createEffect(
+    () =>
+      this.actions$.pipe(
+        ofType(AuthActions.registerSuccess),
+        tap(() => this.router.navigate(['/login']))
+      ),
+    { dispatch: false }
+  );
+
   login$ = createEffect(() =>
     this.actions$.pipe(
       ofType(AuthActions.login),
@@ -25,27 +50,6 @@ export class AuthEffects {
       this.actions$.pipe(
         ofType(AuthActions.loginSuccess),
         tap(() => this.router.navigate(['/dashboard']))
-      ),
-    { dispatch: false }
-  );
-
-  register$ = createEffect(() =>
-    this.actions$.pipe(
-      ofType(AuthActions.register),
-      mergeMap(({ user }) =>
-        this.authService.register({ ...user, confirmPassword: user.password }).pipe(
-          map(newUser => AuthActions.registerSuccess({ user: newUser })),
-          catchError(error => of(AuthActions.registerFailure({ error: error.message })))
-        )
-      )
-    )
-  );
-
-  registerSuccess$ = createEffect(
-    () =>
-      this.actions$.pipe(
-        ofType(AuthActions.registerSuccess),
-        tap(() => this.router.navigate(['/login']))
       ),
     { dispatch: false }
   );
@@ -96,10 +100,4 @@ export class AuthEffects {
       ),
     { dispatch: false }
   );
-
-  constructor(
-    private actions$: Actions,
-    private authService: AuthService,
-    private router: Router
-  ) {}
 }

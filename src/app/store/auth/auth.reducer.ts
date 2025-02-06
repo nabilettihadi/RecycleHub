@@ -17,24 +17,6 @@ export const initialState: AuthState = {
 export const authReducer = createReducer(
   initialState,
   
-  // Login
-  on(AuthActions.login, (state) => ({
-    ...state,
-    loading: true,
-    error: null
-  })),
-  on(AuthActions.loginSuccess, (state, { user }) => ({
-    ...state,
-    user,
-    loading: false,
-    error: null
-  })),
-  on(AuthActions.loginFailure, (state, { error }) => ({
-    ...state,
-    loading: false,
-    error
-  })),
-
   // Register
   on(AuthActions.register, (state) => ({
     ...state,
@@ -48,6 +30,24 @@ export const authReducer = createReducer(
     error: null
   })),
   on(AuthActions.registerFailure, (state, { error }) => ({
+    ...state,
+    loading: false,
+    error
+  })),
+
+  // Login
+  on(AuthActions.login, (state) => ({
+    ...state,
+    loading: true,
+    error: null
+  })),
+  on(AuthActions.loginSuccess, (state, { user }) => ({
+    ...state,
+    user,
+    loading: false,
+    error: null
+  })),
+  on(AuthActions.loginFailure, (state, { error }) => ({
     ...state,
     loading: false,
     error

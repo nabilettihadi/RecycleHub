@@ -1,5 +1,5 @@
 <div class="min-h-screen bg-gray-100 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
-  <div class="sm:mx-auto sm:w-full sm:max-w-md">
+  <div class="sm:mx-auto sm:w-full sm:max-w-2xl">
     <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
       Create your account
     </h2>
@@ -11,136 +11,132 @@
     </p>
   </div>
 
-  <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
+  <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-2xl">
     <div class="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
       <!-- Error Alert -->
       <div *ngIf="error$ | async as error" class="mb-4 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded relative" role="alert">
         <span class="block sm:inline">{{ error }}</span>
       </div>
 
-      <form [formGroup]="registerForm" (ngSubmit)="onSubmit()" class="space-y-6">
-        <!-- Email -->
-        <div>
-          <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
-          <div class="mt-1">
-            <input id="email" type="email" formControlName="email" required
-              class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500">
+      <form [formGroup]="registerForm" (ngSubmit)="onSubmit()" class="space-y-8">
+        <!-- Profile Picture Circle -->
+        <div class="flex flex-col items-center mb-8">
+          <div class="relative w-40 h-40">
+            <div class="w-full h-full rounded-full bg-gray-100 border-4 border-green-500 flex items-center justify-center overflow-hidden">
+              <img *ngIf="imagePreview" [src]="imagePreview" class="w-full h-full object-cover" alt="Profile preview">
+              <svg *ngIf="!imagePreview" class="w-20 h-20 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+              </svg>
+            </div>
+            <label for="profile-upload" 
+              class="absolute bottom-2 right-2 bg-green-600 rounded-full p-3 cursor-pointer hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors duration-200">
+              <svg class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+              </svg>
+              <input id="profile-upload" type="file" (change)="onFileSelected($event)" accept="image/*" class="hidden">
+            </label>
           </div>
-          <div *ngIf="registerForm.get('email')?.touched && registerForm.get('email')?.invalid" class="mt-1 text-sm text-red-600">
-            <div *ngIf="registerForm.get('email')?.errors?.['required']">Email is required</div>
-            <div *ngIf="registerForm.get('email')?.errors?.['email']">Please enter a valid email</div>
-          </div>
+          <p class="mt-2 text-sm text-gray-600">Click to upload profile picture</p>
         </div>
 
-        <!-- Password -->
-        <div>
-          <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
-          <div class="mt-1">
-            <input id="password" type="password" formControlName="password" required
-              class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500">
-          </div>
-          <div *ngIf="registerForm.get('password')?.touched && registerForm.get('password')?.invalid" class="mt-1 text-sm text-red-600">
-            <div *ngIf="registerForm.get('password')?.errors?.['required']">Password is required</div>
-            <div *ngIf="registerForm.get('password')?.errors?.['minlength']">Password must be at least 6 characters</div>
-          </div>
-        </div>
+        <!-- Personal Information -->
+        <div class="space-y-6">
+          <!-- Name Section -->
+          <div class="grid grid-cols-2 gap-6">
+            <div>
+              <label for="firstName" class="block text-sm font-medium text-gray-700">First Name</label>
+              <input id="firstName" type="text" formControlName="firstName" required
+                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500">
+            </div>
 
-        <!-- Confirm Password -->
-        <div>
-          <label for="confirmPassword" class="block text-sm font-medium text-gray-700">Confirm Password</label>
-          <div class="mt-1">
-            <input id="confirmPassword" type="password" formControlName="confirmPassword" required
-              class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500">
-          </div>
-          <div *ngIf="registerForm.hasError('mismatch')" class="mt-1 text-sm text-red-600">
-            Passwords do not match
-          </div>
-        </div>
-
-        <!-- First Name -->
-        <div>
-          <label for="firstName" class="block text-sm font-medium text-gray-700">First Name</label>
-          <div class="mt-1">
-            <input id="firstName" type="text" formControlName="firstName" required
-              class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500">
-          </div>
-        </div>
-
-        <!-- Last Name -->
-        <div>
-          <label for="lastName" class="block text-sm font-medium text-gray-700">Last Name</label>
-          <div class="mt-1">
-            <input id="lastName" type="text" formControlName="lastName" required
-              class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500">
-          </div>
-        </div>
-
-        <!-- Address -->
-        <div formGroupName="address">
-          <h3 class="text-lg font-medium text-gray-900 mb-4">Address</h3>
-          
-          <!-- Street -->
-          <div class="mb-4">
-            <label for="street" class="block text-sm font-medium text-gray-700">Street</label>
-            <div class="mt-1">
-              <input id="street" type="text" formControlName="street" required
-                class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500">
+            <div>
+              <label for="lastName" class="block text-sm font-medium text-gray-700">Last Name</label>
+              <input id="lastName" type="text" formControlName="lastName" required
+                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500">
             </div>
           </div>
 
-          <!-- City -->
-          <div class="mb-4">
-            <label for="city" class="block text-sm font-medium text-gray-700">City</label>
-            <div class="mt-1">
-              <input id="city" type="text" formControlName="city" required
-                class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500">
-            </div>
-          </div>
-
-          <!-- Zip Code -->
+          <!-- Email Section -->
           <div>
-            <label for="zipCode" class="block text-sm font-medium text-gray-700">Zip Code</label>
-            <div class="mt-1">
-              <input id="zipCode" type="text" formControlName="zipCode" required
-                class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500">
+            <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
+            <input id="email" type="email" formControlName="email" required
+              class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500">
+            <div *ngIf="registerForm.get('email')?.touched && registerForm.get('email')?.invalid" class="mt-1 text-sm text-red-600">
+              <div *ngIf="registerForm.get('email')?.errors?.['required']">Email is required</div>
+              <div *ngIf="registerForm.get('email')?.errors?.['email']">Please enter a valid email</div>
             </div>
           </div>
-        </div>
 
-        <!-- Phone Number -->
-        <div>
-          <label for="phoneNumber" class="block text-sm font-medium text-gray-700">Phone Number</label>
-          <div class="mt-1">
-            <input id="phoneNumber" type="tel" formControlName="phoneNumber" required
-              class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500">
-          </div>
-          <div *ngIf="registerForm.get('phoneNumber')?.touched && registerForm.get('phoneNumber')?.errors?.['pattern']" class="mt-1 text-sm text-red-600">
-            Please enter a valid 10-digit phone number
-          </div>
-        </div>
+          <!-- Password Section -->
+          <div class="grid grid-cols-2 gap-6">
+            <div>
+              <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
+              <input id="password" type="password" formControlName="password" required
+                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500">
+              <div *ngIf="registerForm.get('password')?.touched && registerForm.get('password')?.invalid" class="mt-1 text-sm text-red-600">
+                <div *ngIf="registerForm.get('password')?.errors?.['required']">Password is required</div>
+                <div *ngIf="registerForm.get('password')?.errors?.['minlength']">Password must be at least 6 characters</div>
+              </div>
+            </div>
 
-        <!-- Date of Birth -->
-        <div>
-          <label for="dateOfBirth" class="block text-sm font-medium text-gray-700">Date of Birth</label>
-          <div class="mt-1">
-            <input id="dateOfBirth" type="date" formControlName="dateOfBirth" required
-              class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500">
+            <div>
+              <label for="confirmPassword" class="block text-sm font-medium text-gray-700">Confirm Password</label>
+              <input id="confirmPassword" type="password" formControlName="confirmPassword" required
+                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500">
+              <div *ngIf="registerForm.hasError('mismatch')" class="mt-1 text-sm text-red-600">
+                Passwords do not match
+              </div>
+            </div>
           </div>
-        </div>
 
-        <!-- Profile Picture -->
-        <div>
-          <label class="block text-sm font-medium text-gray-700">Profile Picture</label>
-          <div class="mt-1">
-            <input type="file" (change)="onFileSelected($event)" accept="image/*"
-              class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500">
+          <!-- Contact Info Section -->
+          <div class="grid grid-cols-2 gap-6">
+            <div>
+              <label for="phoneNumber" class="block text-sm font-medium text-gray-700">Phone Number</label>
+              <input id="phoneNumber" type="tel" formControlName="phoneNumber" required
+                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500">
+              <div *ngIf="registerForm.get('phoneNumber')?.touched && registerForm.get('phoneNumber')?.errors?.['pattern']" class="mt-1 text-sm text-red-600">
+                Please enter a valid 10-digit phone number
+              </div>
+            </div>
+
+            <div>
+              <label for="dateOfBirth" class="block text-sm font-medium text-gray-700">Date of Birth</label>
+              <input id="dateOfBirth" type="date" formControlName="dateOfBirth" required
+                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500">
+            </div>
+          </div>
+
+          <!-- Address Section -->
+          <div formGroupName="address" class="space-y-4">
+            <h3 class="text-lg font-medium text-gray-900">Address</h3>
+            
+            <div>
+              <label for="street" class="block text-sm font-medium text-gray-700">Street</label>
+              <input id="street" type="text" formControlName="street" required
+                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500">
+            </div>
+
+            <div class="grid grid-cols-2 gap-6">
+              <div>
+                <label for="city" class="block text-sm font-medium text-gray-700">City</label>
+                <input id="city" type="text" formControlName="city" required
+                  class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500">
+              </div>
+
+              <div>
+                <label for="zipCode" class="block text-sm font-medium text-gray-700">Zip Code</label>
+                <input id="zipCode" type="text" formControlName="zipCode" required
+                  class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500">
+              </div>
+            </div>
           </div>
         </div>
 
         <!-- Submit Button -->
         <div>
           <button type="submit" [disabled]="!registerForm.valid || (loading$ | async)"
-            class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50">
+            class="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50 transition-colors duration-200">
             <svg *ngIf="loading$ | async" class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
               <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
               <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
@@ -150,7 +146,7 @@
         </div>
 
         <!-- Login Link -->
-        <div class="text-center">
+        <div class="text-center mt-4">
           <span class="text-sm text-gray-600">Already have an account?</span>
           <a routerLink="/login" class="ml-1 text-sm font-medium text-green-600 hover:text-green-500">
             Sign in

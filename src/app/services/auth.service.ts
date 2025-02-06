@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Observable, of, throwError } from 'rxjs';
+import { delay } from 'rxjs/operators';
 import { User } from '../models/user.model';
 import { LoginForm, RegisterForm } from '../models/auth.model';
 
@@ -64,27 +65,25 @@ export class AuthService {
     return of(newUser);
   }
 
-  login(loginData: LoginForm): Observable<User> {
+  login({ email, password }: LoginForm): Observable<User> {
     const users = this.getUsers();
-    const user = users.find(
-      u => u.email === loginData.email && u.password === loginData.password
-    );
+    const user = users.find(u => u.email === email && u.password === password);
 
-    if (!user) {
-      return throwError(() => new Error('Invalid credentials'));
+    if (user) {
+      localStorage.setItem(this.CURRENT_USER_KEY, JSON.stringify(user));
+      return of(user).pipe(delay(1000)); // Simulate API delay
     }
 
-    localStorage.setItem(this.CURRENT_USER_KEY, JSON.stringify(user));
-    return of(user);
+    return throwError(() => new Error('Invalid email or password'));
   }
 
   logout(): void {
     localStorage.removeItem(this.CURRENT_USER_KEY);
   }
 
-  getCurrentUser(): Observable<User | null> {
-    const user = localStorage.getItem(this.CURRENT_USER_KEY);
-    return of(user ? JSON.parse(user) : null);
+  getCurrentUser(): User | null {
+    const userJson = localStorage.getItem(this.CURRENT_USER_KEY);
+    return userJson ? JSON.parse(userJson) : null;
   }
 
   updateProfile(userId: string, userData: Partial<User>): Observable<User> {

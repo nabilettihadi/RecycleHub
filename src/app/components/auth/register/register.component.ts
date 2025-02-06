@@ -1,15 +1,16 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Store } from '@ngrx/store';
-import { register } from '../../../store/auth/auth.actions';
-import { User, Address } from '../../../models/user.model';
-import { RegisterForm } from '../../../models/auth.model';
+import { RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
+import { register } from '../../../store/auth/auth.actions';
+import { RegisterForm } from '../../../models/auth.model';
+import { selectAuthState } from '../../../store/auth/auth.selectors';
 
 @Component({
   selector: 'app-register',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, RouterLink],
   templateUrl: './register.component.html',
   styleUrls: ['./register.component.css']
 })
@@ -19,6 +20,8 @@ export class RegisterComponent implements OnInit {
   
   registerForm: FormGroup;
   selectedFile: File | null = null;
+  loading$ = this.store.select(state => selectAuthState(state).loading);
+  error$ = this.store.select(state => selectAuthState(state).error);
 
   constructor() {
     this.registerForm = this.fb.group({
@@ -65,6 +68,12 @@ export class RegisterComponent implements OnInit {
       };
 
       this.store.dispatch(register({ user: registerData }));
+    } else {
+      // Mark all fields as touched to trigger validation messages
+      Object.keys(this.registerForm.controls).forEach(key => {
+        const control = this.registerForm.get(key);
+        control?.markAsTouched();
+      });
     }
   }
 }

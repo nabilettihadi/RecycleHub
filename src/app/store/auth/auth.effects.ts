@@ -12,27 +12,6 @@ export class AuthEffects {
   private authService = inject(AuthService);
   private router = inject(Router);
 
-  register$ = createEffect(() =>
-    this.actions$.pipe(
-      ofType(AuthActions.register),
-      mergeMap(({ user }) =>
-        this.authService.register(user).pipe(
-          map(registeredUser => AuthActions.registerSuccess({ user: registeredUser })),
-          catchError(error => of(AuthActions.registerFailure({ error: error.message })))
-        )
-      )
-    )
-  );
-
-  registerSuccess$ = createEffect(
-    () =>
-      this.actions$.pipe(
-        ofType(AuthActions.registerSuccess),
-        tap(() => this.router.navigate(['/login']))
-      ),
-    { dispatch: false }
-  );
-
   login$ = createEffect(() =>
     this.actions$.pipe(
       ofType(AuthActions.login),
@@ -50,6 +29,31 @@ export class AuthEffects {
       this.actions$.pipe(
         ofType(AuthActions.loginSuccess),
         tap(() => this.router.navigate(['/dashboard']))
+      ),
+    { dispatch: false }
+  );
+
+  register$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(AuthActions.register),
+      mergeMap(({ user }) =>
+        this.authService.register(user).pipe(
+          map(registeredUser => AuthActions.registerSuccess({ user: registeredUser })),
+          catchError(error => of(AuthActions.registerFailure({ error: error.message })))
+        )
+      )
+    )
+  );
+
+  registerSuccess$ = createEffect(
+    () =>
+      this.actions$.pipe(
+        ofType(AuthActions.registerSuccess),
+        tap(({ user }) => {
+          // Show success message
+          window.alert('Registration successful! Please login with your credentials.');
+          this.router.navigate(['/login']);
+        })
       ),
     { dispatch: false }
   );

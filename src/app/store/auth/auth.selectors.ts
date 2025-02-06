@@ -1,39 +1,24 @@
 import { createFeatureSelector, createSelector } from '@ngrx/store';
 import { AuthState } from './auth.reducer';
 
-export const selectAuthState = createFeatureSelector<AuthState>('auth');
+export const selectAuth = createFeatureSelector<AuthState>('auth');
 
-export const selectCurrentUser = createSelector(
-  selectAuthState,
+export const selectAuthState = createSelector(
+  selectAuth,
+  (state) => state
+);
+
+export const selectUser = createSelector(
+  selectAuth,
   (state) => state.user
 );
 
-export const selectIsAuthenticated = createSelector(
-  selectCurrentUser,
-  (user) => !!user
-);
-
-export const selectIsCollector = createSelector(
-  selectCurrentUser,
-  (user) => user?.userType === 'collector'
-);
-
-export const selectIsParticular = createSelector(
-  selectCurrentUser,
-  (user) => user?.userType === 'particular'
-);
-
 export const selectAuthLoading = createSelector(
-  selectAuthState,
+  selectAuth,
   (state) => state.loading
 );
 
 export const selectAuthError = createSelector(
-  selectAuthState,
+  selectAuth,
   (state) => state.error
-);
-
-export const selectUserCity = createSelector(
-  selectCurrentUser,
-  (user) => user?.address.city
 );

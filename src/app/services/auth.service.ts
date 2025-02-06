@@ -112,8 +112,7 @@ export class AuthService {
     
     users[index] = updatedUser;
     localStorage.setItem(this.USERS_KEY, JSON.stringify(users));
-    this.currentUser = updatedUser;
-    localStorage.setItem('currentUser', JSON.stringify(updatedUser));
+    localStorage.setItem(this.CURRENT_USER_KEY, JSON.stringify(updatedUser));
     return true;
   }
 

@@ -46,6 +46,13 @@
             <button type="submit" class="btn btn-primary" [disabled]="!profileForm.valid">
               Enregistrer les modifications
             </button>
+
+            <div class="mt-4 border-top pt-3">
+              <h5 class="text-danger">Zone dangereuse</h5>
+              <button type="button" class="btn btn-danger" (click)="deleteAccount()">
+                Supprimer mon compte
+              </button>
+            </div>
           </form>
         </div>
       </div>

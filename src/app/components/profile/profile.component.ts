@@ -51,4 +51,12 @@ export class ProfileComponent implements OnInit {
       this.authService.updateUser(updatedUser);
     }
   }
+
+  deleteAccount() {
+    if (this.currentUser && confirm('Êtes-vous sûr de vouloir supprimer votre compte ? Cette action est irréversible.')) {
+      this.authService.deleteAccount(this.currentUser.email).subscribe(() => {
+        this.router.navigate(['/login']);
+      });
+    }
+  }
 }

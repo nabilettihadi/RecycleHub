@@ -2,58 +2,125 @@
   <div class="row justify-content-center">
     <div class="col-md-8">
       <div class="card">
-        <div class="card-header">Modifier mon profil</div>
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <h4 class="mb-0">Mon Profil</h4>
+          <span class="badge" [ngClass]="currentUser?.userType === 'collector' ? 'bg-primary' : 'bg-success'">
+            {{currentUser?.userType === 'collector' ? 'Collecteur' : 'Particulier'}}
+          </span>
+        </div>
         <div class="card-body">
           <form [formGroup]="profileForm" (ngSubmit)="onSubmit()">
+            <!-- Profile Picture -->
+            <div class="text-center mb-4">
+              <img [src]="profileForm.get('profilePicture')?.value || 'assets/default-avatar.png'" 
+                   class="rounded-circle mb-3" 
+                   alt="Profile Picture" 
+                   style="width: 150px; height: 150px; object-fit: cover;">
+              <div>
+                <input type="file" 
+                       class="d-none" 
+                       accept="image/*" 
+                       #fileInput 
+                       (change)="onFileSelected($event)">
+                <button type="button" 
+                        class="btn btn-outline-primary btn-sm" 
+                        (click)="fileInput.click()">
+                  Changer la photo
+                </button>
+              </div>
+            </div>
+
+            <!-- Personal Information -->
             <div class="row">
               <div class="col-md-6 mb-3">
                 <label class="form-label">Prénom</label>
                 <input type="text" class="form-control" formControlName="firstName">
-                <div *ngIf="profileForm.get('firstName')?.invalid && profileForm.get('firstName')?.touched" class="text-danger">
+                <div *ngIf="profileForm.get('firstName')?.invalid && profileForm.get('firstName')?.touched" 
+                     class="text-danger small">
                   Le prénom est requis
                 </div>
               </div>
               <div class="col-md-6 mb-3">
                 <label class="form-label">Nom</label>
                 <input type="text" class="form-control" formControlName="lastName">
-                <div *ngIf="profileForm.get('lastName')?.invalid && profileForm.get('lastName')?.touched" class="text-danger">
+                <div *ngIf="profileForm.get('lastName')?.invalid && profileForm.get('lastName')?.touched" 
+                     class="text-danger small">
                   Le nom est requis
                 </div>
               </div>
             </div>
 
-            <div class="mb-3">
-              <label class="form-label">Adresse</label>
-              <textarea class="form-control" formControlName="address" rows="2"></textarea>
-              <div *ngIf="profileForm.get('address')?.invalid && profileForm.get('address')?.touched" class="text-danger">
-                L'adresse est requise
+            <!-- Address -->
+            <div formGroupName="address">
+              <div class="mb-3">
+                <label class="form-label">Rue</label>
+                <input type="text" class="form-control" formControlName="street">
+                <div *ngIf="profileForm.get('address.street')?.invalid && profileForm.get('address.street')?.touched" 
+                     class="text-danger small">
+                  La rue est requise
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-md-8 mb-3">
+                  <label class="form-label">Ville</label>
+                  <input type="text" class="form-control" formControlName="city">
+                  <div *ngIf="profileForm.get('address.city')?.invalid && profileForm.get('address.city')?.touched" 
+                       class="text-danger small">
+                    La ville est requise
+                  </div>
+                </div>
+                <div class="col-md-4 mb-3">
+                  <label class="form-label">Code postal</label>
+                  <input type="text" class="form-control" formControlName="zipCode">
+                  <div *ngIf="profileForm.get('address.zipCode')?.invalid && profileForm.get('address.zipCode')?.touched" 
+                       class="text-danger small">
+                    Le code postal est requis
+                  </div>
+                </div>
               </div>
             </div>
 
+            <!-- Contact Information -->
             <div class="mb-3">
               <label class="form-label">Téléphone</label>
-              <input type="tel" class="form-control" formControlName="phone">
-              <div *ngIf="profileForm.get('phone')?.errors?.['pattern']" class="text-danger">
+              <input type="tel" class="form-control" formControlName="phoneNumber">
+              <div *ngIf="profileForm.get('phoneNumber')?.errors?.['pattern']" class="text-danger small">
                 Format téléphone marocain invalide (ex: 0612345678)
               </div>
             </div>
 
             <div class="mb-3">
               <label class="form-label">Date de naissance</label>
-              <input type="date" class="form-control" formControlName="birthDate">
+              <input type="date" class="form-control" formControlName="dateOfBirth">
+              <div *ngIf="profileForm.get('dateOfBirth')?.invalid && profileForm.get('dateOfBirth')?.touched" 
+                   class="text-danger small">
+                La date de naissance est requise
+              </div>
             </div>
 
-            <button type="submit" class="btn btn-primary" [disabled]="!profileForm.valid">
-              Enregistrer les modifications
+            <!-- Success Message -->
+            <div *ngIf="updateSuccess" class="alert alert-success">
+              Profil mis à jour avec succès!
+            </div>
+
+            <!-- Submit Button -->
+            <button type="submit" 
+                    class="btn btn-primary w-100" 
+                    [disabled]="!profileForm.valid || isUpdating">
+              <span *ngIf="isUpdating" class="spinner-border spinner-border-sm me-2"></span>
+              {{isUpdating ? 'Mise à jour...' : 'Enregistrer les modifications'}}
             </button>
-
-            <div class="mt-4 border-top pt-3">
-              <h5 class="text-danger">Zone dangereuse</h5>
-              <button type="button" class="btn btn-danger" (click)="deleteAccount()">
-                Supprimer mon compte
-              </button>
-            </div>
           </form>
+
+          <!-- Danger Zone -->
+          <div class="mt-5">
+            <h5 class="text-danger border-bottom pb-2">Zone dangereuse</h5>
+            <p class="text-muted small">Une fois que vous supprimez votre compte, il n'y a pas de retour en arrière. Soyez certain.</p>
+            <button class="btn btn-outline-danger" 
+                    (click)="onDeleteAccount()">
+              Supprimer mon compte
+            </button>
+          </div>
         </div>
       </div>
     </div>

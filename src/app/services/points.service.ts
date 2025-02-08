@@ -33,8 +33,29 @@ export class PointsService {
         return POINTS_RATES[wasteType] * weight;
     }
 
-    addPointsTransaction(userId: string, collectionRequestId: string, wasteType: WasteType, weight: number): Observable<PointsTransaction> {
-        const pointsEarned = this.calculatePoints(wasteType, weight);
+    addPointsTransaction(userId: string, collectionRequestId: string, wasteType: WasteType, weight: number, isValidated: boolean): Observable<PointsTransaction> {
+        if (!isValidated) {
+            return throwError(() => new Error('Collection must be validated to award points'));
+        }
+        const pointsEarned = this.calculatePoints(wasteType, weight);        
+        // Award points only if the collection is validated
+        if (isValidated) {
+            const transaction: PointsTransaction = {
+                id: Date.now().toString(),
+                userId,
+                collectionRequestId,
+                wasteType,
+                weight,
+                pointsEarned,
+                createdAt: new Date()
+            };
+            
+            const transactions = this.getTransactions();
+            transactions.push(transaction);
+            localStorage.setItem(this.TRANSACTIONS_KEY, JSON.stringify(transactions));
+
+            return of(transaction);
+        }
         
         const transaction: PointsTransaction = {
             id: Date.now().toString(),
@@ -66,7 +87,10 @@ export class PointsService {
         return of(earnedPoints - usedPoints);
     }
 
-    convertPointsToVoucher(userId: string, points: number): Observable<Voucher> {
+    convertPointsToVoucher(userId: string, points: number): Observable<Voucher> {        
+        if (points < 100) {
+            return throwError(() => new Error('Minimum 100 points required for voucher conversion'));
+        }
         const voucherRate = VOUCHER_RATES.find(rate => rate.points === points);
         
         if (!voucherRate) {

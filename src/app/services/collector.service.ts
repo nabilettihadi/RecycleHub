@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Observable, of } from 'rxjs';
+import { CollectionRequest, RequestStatus } from '../models/collection-request.model';
 import { Store } from '@ngrx/store';
 import { User } from '../models/user.model';
 import { selectCollectors } from '../store/collection/collection.selectors';    
@@ -45,6 +46,22 @@ export class CollectorService {
       return of(this.collectors[index]);
     }
     return of(undefined);
+  }
+
+  updateCollectionRequestStatus(requestId: string, newStatus: RequestStatus): Observable<CollectionRequest | undefined> {
+    const requests = this.getCollectionRequests(); // Assume this method retrieves collection requests
+    const requestIndex = requests.findIndex(r => r.id === requestId);
+    
+    if (requestIndex !== -1) {
+        requests[requestIndex].status = newStatus;
+        localStorage.setItem('collection_requests', JSON.stringify(requests)); // Save updated requests
+        return of(requests[requestIndex]);
+    }
+    return of(undefined);
+  }
+
+  private getCollectionRequests(): CollectionRequest[] {
+    return JSON.parse(localStorage.getItem('collection_requests') || '[]');
   }
 
   deleteCollector(id: string): Observable<boolean> {

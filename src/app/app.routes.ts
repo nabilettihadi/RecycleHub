@@ -8,8 +8,13 @@ export const routes: Routes = [
   { path: '', redirectTo: '/login', pathMatch: 'full' },
   { path: 'login', component: LoginComponent },
   { path: 'register', component: RegisterComponent },
+  { 
+    path: 'collection-request',
+    loadComponent: () => import('./components/collection-request/collection-request.component').then(m => m.CollectionRequestComponent)
+  },
   {
     path: 'dashboard',
+
     loadComponent: () => import('./components/dashboard/dashboard.component').then(m => m.DashboardComponent),
     canActivate: [authGuard]
   },

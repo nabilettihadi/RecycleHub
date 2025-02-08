@@ -1,0 +1,54 @@
+<form [formGroup]="collectionRequestForm" (ngSubmit)="onSubmit()">
+  <div formArrayName="wasteItems">
+    <div *ngFor="let wasteItem of collectionRequestForm.get('wasteItems').controls; let i = index">
+      <div [formGroupName]="i">
+        <label for="type">Type de déchet:</label>
+        <select formControlName="type" required>
+          <option value="plastique">Plastique</option>
+          <option value="verre">Verre</option>
+          <option value="papier">Papier</option>
+          <option value="metal">Métal</option>
+        </select>
+        
+        <label for="weight">Poids (kg):</label>
+        <input type="number" formControlName="weight" required min="1" />
+
+        <label for="photos">Photos:</label>
+        <input type="file" (change)="onFileSelected($event)" multiple />
+      </div>
+    </div>
+  </div>
+
+  <button type="button" (click)="addWasteItem()">Ajouter un déchet</button>
+
+  <div>
+    <label for="totalWeight">Poids total (kg):</label>
+    <input type="number" formControlName="totalWeight" required />
+  </div>
+
+  <div formGroupName="collectionAddress">
+    <label for="street">Rue:</label>
+    <input type="text" formControlName="street" required />
+    
+    <label for="city">Ville:</label>
+    <input type="text" formControlName="city" required />
+    
+    <label for="zipCode">Code postal:</label>
+    <input type="text" formControlName="zipCode" required />
+  </div>
+
+  <div>
+    <label for="collectionDate">Date de collecte:</label>
+    <input type="date" formControlName="collectionDate" required />
+    
+    <label for="timeSlot">Créneau horaire:</label>
+    <input type="text" formControlName="timeSlot" required />
+  </div>
+
+  <div>
+    <label for="notes">Notes supplémentaires:</label>
+    <textarea formControlName="notes"></textarea>
+  </div>
+
+  <button type="submit" [disabled]="collectionRequestForm.invalid">Soumettre la demande</button>
+</form>

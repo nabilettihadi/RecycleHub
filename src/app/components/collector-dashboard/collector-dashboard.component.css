@@ -1,0 +1,23 @@
+/* Add styles for the collector dashboard here */
+.dashboard {
+  padding: 20px;
+  background-color: #f9f9f9;
+}
+
+h2 {
+  color: #333;
+}
+
+button {
+  margin-right: 10px;
+  padding: 10px 15px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #0056b3;
+}

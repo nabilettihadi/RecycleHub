@@ -8,41 +8,35 @@ import { LoginForm, RegisterForm } from '../models/auth.model';
   providedIn: 'root'
 })
 export class AuthService {
-  private readonly USERS_KEY = 'users';
+  private readonly USERS_KEY = 'recyclehub_users';
   private readonly CURRENT_USER_KEY = 'currentUser';
 
   constructor() {
-    this.initializeCollectors();
+    this.initializeUsers();
   }
 
-  private initializeCollectors(): void {
-    const users = this.getUsers();
-    if (users.length === 0) {
-      const collectors: User[] = [
+  private initializeUsers() {
+    if (!localStorage.getItem(this.USERS_KEY)) {
+      const defaultUsers: User[] = [
         {
           id: '1',
-          email: 'collector1@recyclehub.com',
-          password: 'password123',
           firstName: 'John',
           lastName: 'Doe',
+          email: 'collector@example.com',
+          password: 'password123',
+          phoneNumber: '0612345678',
           address: {
-            street: '123 Green Street',
+            street: '123 Main St',
             city: 'Casablanca',
             zipCode: '20000'
           },
-          phoneNumber: '0600000001',
           dateOfBirth: new Date('1990-01-01'),
-          userType: 'collector',
+          role: 'collector',
           points: 0
         }
       ];
-      localStorage.setItem(this.USERS_KEY, JSON.stringify(collectors));
+      localStorage.setItem(this.USERS_KEY, JSON.stringify(defaultUsers));
     }
-  }
-
-  private getUsers(): User[] {
-    const users = localStorage.getItem(this.USERS_KEY);
-    return users ? JSON.parse(users) : [];
   }
 
   register(registerData: RegisterForm): Observable<User> {
@@ -56,7 +50,7 @@ export class AuthService {
     const newUser: User = {
       ...registerData,
       id: Date.now().toString(),
-      userType: 'particular',
+      role: 'particular',
       points: 0
     };
 
@@ -65,16 +59,10 @@ export class AuthService {
     return of(newUser);
   }
 
-  login({ email, password }: LoginForm): Observable<User> {
-    const users = this.getUsers();
+  login(email: string, password: string): Observable<User | null> {
+    const users: User[] = JSON.parse(localStorage.getItem(this.USERS_KEY) || '[]');
     const user = users.find(u => u.email === email && u.password === password);
-
-    if (user) {
-      localStorage.setItem(this.CURRENT_USER_KEY, JSON.stringify(user));
-      return of(user).pipe(delay(1000)); // Simulate API delay
-    }
-
-    return throwError(() => new Error('Invalid email or password'));
+    return of(user || null);
   }
 
   logout(): void {
@@ -129,5 +117,10 @@ export class AuthService {
     localStorage.removeItem(this.CURRENT_USER_KEY);
     
     return of(void 0);
+  }
+
+  private getUsers(): User[] {
+    const users = localStorage.getItem(this.USERS_KEY);
+    return users ? JSON.parse(users) : [];
   }
 }

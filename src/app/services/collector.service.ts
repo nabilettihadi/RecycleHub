@@ -1,55 +1,55 @@
 import { Injectable } from '@angular/core';
-import { User } from '../auth/models/user.model';
+import { Observable, of } from 'rxjs';
+import { Store } from '@ngrx/store';
+import { User } from '../models/user.model';
+import { selectCollectors } from '../store/collection/collection.selectors';    
+import { AppState } from '../store/app.state';
 
 @Injectable({
   providedIn: 'root'
 })
 export class CollectorService {
-  private readonly COLLECTORS_KEY = 'recyclehub_collectors';
-
-  constructor() {
-    this.initializeCollectors();
-  }
-
-  private initializeCollectors() {
-    if (!localStorage.getItem(this.COLLECTORS_KEY)) {
-      const collectors: User[] = [
-        {
-          email: 'collector1@recyclehub.com',
-          password: 'password123',
-          firstName: 'Mohammed',
-          lastName: 'Alami',
-          address: 'Casablanca, Maarif',
-          phone: '0612345678',
-          birthDate: new Date('1990-01-01'),
-          role: 'collecteur'
-        },
-        {
-          email: 'collector2@recyclehub.com',
-          password: 'password123',
-          firstName: 'Ahmed',
-          lastName: 'Benani',
-          address: 'Rabat, Agdal',
-          phone: '0623456789',
-          birthDate: new Date('1988-05-15'),
-          role: 'collecteur'
-        },
-        {
-          email: 'collector3@recyclehub.com',
-          password: 'password123',
-          firstName: 'Karim',
-          lastName: 'Idrissi',
-          address: 'Marrakech, Guéliz',
-          phone: '0634567890',
-          birthDate: new Date('1992-08-20'),
-          role: 'collecteur'
-        }
-      ];
-      localStorage.setItem(this.COLLECTORS_KEY, JSON.stringify(collectors));
+  private collectors: User[] = [
+    {
+      id: '1',
+      firstName: 'John',
+      lastName: 'Doe',
+      email: 'john@example.com',
+      phoneNumber: '0612345678',
+      address: {
+        street: '123 Main St',
+        city: 'Casablanca',
+        zipCode: '20000'
+      },
+      dateOfBirth: new Date('1990-01-01'),
+      role: 'collector',
+      points: 0
     }
+  ];
+
+  constructor(private store: Store<AppState>) {}
+
+  getCollectors(): Observable<User[]> {
+    return of(this.collectors);
   }
 
-  getCollectors(): User[] {
-    return JSON.parse(localStorage.getItem(this.COLLECTORS_KEY) || '[]');
+  addCollector(collector: User): Observable<User> {
+    this.collectors.push(collector);
+    return of(collector);
+  }
+
+  updateCollector(id: string, updates: Partial<User>): Observable<User | undefined> {
+    const index = this.collectors.findIndex(c => c.id === id);
+    if (index !== -1) {
+      this.collectors[index] = { ...this.collectors[index], ...updates };
+      return of(this.collectors[index]);
+    }
+    return of(undefined);
+  }
+
+  deleteCollector(id: string): Observable<boolean> {
+    const initialLength = this.collectors.length;
+    this.collectors = this.collectors.filter(c => c.id !== id);
+    return of(this.collectors.length !== initialLength);
   }
 }

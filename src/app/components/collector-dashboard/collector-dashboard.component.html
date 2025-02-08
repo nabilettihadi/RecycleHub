@@ -1,0 +1,9 @@
+<div>
+  <h2>Collector Dashboard</h2>
+  <div *ngFor="let request of collectionRequests$ | async">
+    <h3>{{ request.collectionAddress.street }}</h3>
+    <p>Status: {{ request.status }}</p>
+    <button (click)="acceptRequest(request.id)">Accept</button>
+    <button (click)="rejectRequest(request.id)">Reject</button>
+  </div>
+</div>

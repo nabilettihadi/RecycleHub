@@ -6,14 +6,14 @@ export interface Address {
 
 export interface User {
     id?: string;
-    email: string;
-    password: string;
     firstName: string;
     lastName: string;
-    address: Address;
+    email: string;
+    password?: string;
     phoneNumber: string;
+    address: Address;
     dateOfBirth: Date;
+    role: 'collector' | 'particular';
+    points: number;
     profilePicture?: string;
-    userType: 'collector' | 'particular';
-    points?: number;
 }

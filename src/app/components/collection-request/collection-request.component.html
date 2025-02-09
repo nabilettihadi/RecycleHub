@@ -66,7 +66,21 @@
       <div>
         <label class="block text-sm font-medium text-gray-700">Adresse de collecte</label>
         <input type="text" 
-               formControlName="collectionAddress"
+               formControlName="collectionAddress.street"
+               class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500">
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-gray-700">Ville</label>
+        <input type="text" 
+               formControlName="collectionAddress.city"
+               class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500">
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-gray-700">Code postal</label>
+        <input type="text" 
+               formControlName="collectionAddress.postalCode"
                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500">
       </div>
 
@@ -102,12 +116,28 @@
       </div>
     </div>
 
-    <div *ngIf="collectionRequestForm.invalid && (collectionRequestForm.dirty || collectionRequestForm.touched)" class="text-red-600">
-      <p *ngIf="collectionRequestForm.get('collectionAddress')?.invalid">Adresse de collecte est requise.</p>
-      <p *ngIf="collectionRequestForm.get('collectionDate')?.invalid">Date de collecte est requise.</p>
-      <p *ngIf="collectionRequestForm.get('timeSlot')?.invalid">Créneau horaire est requis.</p>
-      <p *ngIf="wasteItems.length > 3">Vous ne pouvez pas avoir plus de 3 demandes simultanées.</p>
-      <p *ngIf="calculateTotalWeight('currentUserId') > 10">Le poids total ne doit pas dépasser 10 kg.</p>
+    <div *ngIf="collectionRequestForm.invalid && (collectionRequestForm.dirty || collectionRequestForm.touched)" class="text-red-600 space-y-2 bg-red-50 p-4 rounded-md">
+      <p *ngIf="collectionRequestForm.get('collectionAddress.street')?.invalid">
+        • L'adresse de rue est requise et doit contenir au moins 3 caractères.
+      </p>
+      <p *ngIf="collectionRequestForm.get('collectionAddress.city')?.invalid">
+        • La ville est requise et doit contenir au moins 2 caractères.
+      </p>
+      <p *ngIf="collectionRequestForm.get('collectionAddress.postalCode')?.invalid">
+        • Le code postal est requis et doit contenir 5 chiffres.
+      </p>
+      <p *ngIf="collectionRequestForm.get('collectionDate')?.invalid">
+        • La date de collecte est requise et doit être dans le futur.
+      </p>
+      <p *ngIf="collectionRequestForm.get('timeSlot')?.invalid">
+        • Un créneau horaire est requis.
+      </p>
+      <p *ngIf="wasteItems.length > 3">
+        • Vous ne pouvez pas avoir plus de 3 demandes simultanées.
+      </p>
+      <p *ngIf="calculateTotalWeight() > 10">
+        • Le poids total ne doit pas dépasser 10 kg.
+      </p>
     </div>
 
     <button type="submit" 

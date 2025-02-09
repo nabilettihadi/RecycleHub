@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, FormArray, Validators, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, FormGroup, FormArray, Validators, ReactiveFormsModule, AbstractControl } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import { createCollectionRequest } from '../../store/collection/collection.actions';
 import { CollectionRequest } from '../../models/collection-request.model';
@@ -18,10 +18,18 @@ export class CollectionRequestComponent implements OnInit {
   constructor(private fb: FormBuilder, private store: Store) {
     this.collectionRequestForm = this.fb.group({
       wasteItems: this.fb.array([]),
-      collectionAddress: ['', Validators.required],
-      collectionDate: ['', Validators.required],
+      collectionAddress: this.fb.group({
+        street: ['', [Validators.required, Validators.minLength(3)]],
+        city: ['', [Validators.required, Validators.minLength(2)]],
+        postalCode: ['', [
+          Validators.required, 
+          Validators.pattern(/^\d{5}$/) // Validate 5-digit postal code
+        ]],
+        country: ['Maroc', Validators.required]
+      }),
+      collectionDate: ['', [Validators.required, this.futureDateValidator]],
       timeSlot: ['', [Validators.required, this.timeSlotValidator]],
-      notes: ['']
+      notes: ['', Validators.maxLength(500)]
     });
   }
 
@@ -69,6 +77,29 @@ export class CollectionRequestComponent implements OnInit {
   private maxRequests = 3; // Maximum simultaneous requests
   private totalWeightLimit = 10; // Maximum total weight in kg
 
+  timeSlotValidator(control: any): { [key: string]: boolean } | null {
+    // Implement your validation logic here
+    return null; // Return null if valid, or an object if invalid
+  }
+
+  futureDateValidator(control: AbstractControl): {[key: string]: any} | null {
+    const currentDate = new Date();
+    const inputDate = new Date(control.value);
+    return inputDate > currentDate ? null : { 'pastDate': true };
+  }
+
+  getCurrentRequests(): number {
+    // Implement logic to return the current number of requests
+    return this.wasteItems.length; // Example implementation
+  }
+
+  calculateTotalWeight(): number {
+    return this.wasteItems.controls.reduce((total, item) => {
+      const weight = item.get('weight')?.value || 0;
+      return total + weight;
+    }, 0);
+  }
+
   onSubmit(): void {
     const currentRequests = this.getCurrentRequests(); // Method to get current requests count
     const totalWeight = this.calculateTotalWeight(); // Method to calculate total weight of current request
@@ -83,14 +114,21 @@ export class CollectionRequestComponent implements OnInit {
       return;
     }
     if (this.collectionRequestForm.valid) {
-      const requestData: CollectionRequest = {
-        ...this.collectionRequestForm.value,
-        userId: 'currentUserId',
+      const formValue = this.collectionRequestForm.value;
+      const collectionRequest: CollectionRequest = {
+        id: '', // Generate or get from backend
+        userId: '', // Get from current user
+        wasteItems: formValue.wasteItems,
+        collectionAddress: formValue.collectionAddress,
+        collectionDate: formValue.collectionDate,
+        timeSlot: formValue.timeSlot,
         status: 'en_attente',
         createdAt: new Date(),
         updatedAt: new Date(),
+        totalWeight: this.calculateTotalWeight()
       };
-      this.store.dispatch(createCollectionRequest({ request: requestData }));
+
+      this.store.dispatch(createCollectionRequest({ request: collectionRequest }));
     
     this.collectionRequestForm.reset();
     this.addWasteItem();

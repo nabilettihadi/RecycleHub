@@ -6,13 +6,17 @@ import { ProfileComponent } from './components/profile/profile.component';
 import { CollectorDashboardComponent } from './components/collector-dashboard/collector-dashboard.component'; // Importing the component
 
 export const routes: Routes = [
-  { path: '', redirectTo: '/login', pathMatch: 'full' },
+  { path: '', redirectTo: '/home', pathMatch: 'full' },
   { path: 'login', component: LoginComponent },
   { path: 'register', component: RegisterComponent },
   { 
     path: 'collector-dashboard',
     component: CollectorDashboardComponent,
     canActivate: [authGuard]
+  },
+  { 
+    path: 'home',
+    loadComponent: () => import('./components/home/home.component').then(m => m.HomeComponent)
   },
   {
     path: 'collection-request',

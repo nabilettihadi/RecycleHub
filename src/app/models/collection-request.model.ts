@@ -1,5 +1,3 @@
-import { Address } from './user.model';
-
 export type WasteType = 'plastique' | 'verre' | 'papier' | 'metal';
 
 export type RequestStatus = 'en_attente' | 'occupee' | 'en_cours' | 'validee' | 'rejetee';
@@ -10,11 +8,18 @@ export interface WasteItem {
     photos?: string[];
 }
 
+export interface Address {
+  street: string;
+  city: string;
+  postalCode: string;
+  country?: string;
+}
+
 export interface CollectionRequest {
   id: string;
   userId: string;
   wasteItems: WasteItem[];
-  collectionAddress: string;
+  collectionAddress: Address;
   collectionDate: Date;
   timeSlot: string;
   status: RequestStatus;
@@ -22,7 +27,6 @@ export interface CollectionRequest {
   updatedAt: Date;
   totalWeight?: number; // Optional field to store total weight
 }
-
 
 export interface CollectionRequestForm extends Omit<CollectionRequest, 
     'id' | 

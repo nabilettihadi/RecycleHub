@@ -48,6 +48,18 @@ export class CollectorService {
     return of(undefined);
   }
 
+  getCurrentRequestsCount(userId: string): number {
+    const requests = this.getCollectionRequests();
+    return requests.filter(request => request.userId === userId && request.status === 'en_attente').length;
+  }
+
+  calculateTotalWeight(userId: string): number {
+    const requests = this.getCollectionRequests();
+    return requests
+      .filter(request => request.userId === userId && request.status === 'en_attente')
+      .reduce((total, request) => total + request.wasteItems.reduce((sum, item) => sum + item.weight, 0), 0);
+  }
+
   updateCollectionRequestStatus(requestId: string, newStatus: RequestStatus): Observable<CollectionRequest | undefined> {
     const requests = this.getCollectionRequests(); // Assume this method retrieves collection requests
     const requestIndex = requests.findIndex(r => r.id === requestId);
@@ -60,7 +72,7 @@ export class CollectorService {
     return of(undefined);
   }
 
-  private getCollectionRequests(): CollectionRequest[] {
+  getCollectionRequests(): CollectionRequest[] {
     return JSON.parse(localStorage.getItem('collection_requests') || '[]');
   }
 

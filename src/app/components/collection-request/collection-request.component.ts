@@ -20,7 +20,7 @@ export class CollectionRequestComponent implements OnInit {
       wasteItems: this.fb.array([]),
       collectionAddress: ['', Validators.required],
       collectionDate: ['', Validators.required],
-      timeSlot: ['', Validators.required],
+      timeSlot: ['', [Validators.required, this.timeSlotValidator]],
       notes: ['']
     });
   }
@@ -66,7 +66,22 @@ export class CollectionRequestComponent implements OnInit {
     }
   }
 
+  private maxRequests = 3; // Maximum simultaneous requests
+  private totalWeightLimit = 10; // Maximum total weight in kg
+
   onSubmit(): void {
+    const currentRequests = this.getCurrentRequests(); // Method to get current requests count
+    const totalWeight = this.calculateTotalWeight(); // Method to calculate total weight of current request
+
+    if (currentRequests >= this.maxRequests) {
+      // Handle maximum requests error
+      return;
+    }
+
+    if (totalWeight > this.totalWeightLimit) {
+      // Handle total weight error
+      return;
+    }
     if (this.collectionRequestForm.valid) {
       const requestData: CollectionRequest = {
         ...this.collectionRequestForm.value,
@@ -76,6 +91,9 @@ export class CollectionRequestComponent implements OnInit {
         updatedAt: new Date(),
       };
       this.store.dispatch(createCollectionRequest({ request: requestData }));
+    
+    this.collectionRequestForm.reset();
+    this.addWasteItem();
 
     } else {
       Object.keys(this.collectionRequestForm.controls).forEach(key => {

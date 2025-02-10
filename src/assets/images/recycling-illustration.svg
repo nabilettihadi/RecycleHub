@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600">
+  <!-- Ajoutez ici votre illustration SVG -->
+  <style>
+    .recycling-icon { fill: #059669; }
+    .background { fill: #ecfdf5; }
+  </style>
+  <circle class="background" cx="400" cy="300" r="250"/>
+  <path class="recycling-icon" d="M400 150l50 86.6h-100z"/>
+  <path class="recycling-icon" d="M350 236.6l50 86.6l-100-0.1z"/>
+  <path class="recycling-icon" d="M450 236.6l50 86.6l-100-0.1z"/>
+  <!-- Ajoutez d'autres éléments décoratifs -->
+</svg> 

@@ -2,14 +2,23 @@ import { Component, OnInit, inject } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Store } from '@ngrx/store';
-import { RouterLink } from '@angular/router';
+import { RouterLink, RouterModule } from '@angular/router';
 import * as AuthActions from '../../../store/auth/auth.actions';
 import { selectAuthState, selectIsAuthenticated } from '../../../store/auth/auth.selectors';
+import { NavbarComponent } from '../../shared/navbar/navbar.component';
+import { FooterComponent } from '../../shared/footer/footer.component';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink],
+  imports: [
+    CommonModule, 
+    RouterModule, 
+    ReactiveFormsModule,
+    RouterLink,
+    NavbarComponent,
+    FooterComponent
+  ],
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.css']
 })

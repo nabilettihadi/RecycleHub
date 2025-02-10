@@ -2,15 +2,23 @@ import { Component, OnInit, inject } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, AbstractControl } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Store } from '@ngrx/store';
-import { RouterLink } from '@angular/router';
+import { RouterLink, RouterModule } from '@angular/router';
 import { register } from '../../../store/auth/auth.actions';
 import { selectAuthState, selectIsAuthenticated } from '../../../store/auth/auth.selectors';
 import { of } from 'rxjs';
+import { NavbarComponent } from '../../shared/navbar/navbar.component';
+import { FooterComponent } from '../../shared/footer/footer.component';
 
 @Component({
   selector: 'app-register',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink],
+  imports: [
+    CommonModule, 
+    RouterModule, 
+    ReactiveFormsModule,
+    NavbarComponent,
+    FooterComponent
+  ],
   templateUrl: './register.component.html',
   styleUrls: ['./register.component.css']
 })

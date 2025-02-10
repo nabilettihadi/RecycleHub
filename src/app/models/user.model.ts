@@ -1,11 +1,9 @@
-export interface Address {
-    street: string;
-    city: string;
-    zipCode: string;
-}
+import { Address } from './collection-request.model';
+
+export type UserType = 'collector' | 'particular';
 
 export interface User {
-    id?: string;
+    id: string;
     email: string;
     password: string;
     firstName: string;
@@ -14,6 +12,6 @@ export interface User {
     phoneNumber: string;
     dateOfBirth: Date;
     profilePicture?: string;
-    userType: 'collector' | 'particular';
-    points?: number;
+    userType: UserType;
+    points: number;
 }

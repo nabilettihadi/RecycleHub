@@ -10,33 +10,59 @@ import { LoginForm, RegisterForm } from '../models/auth.model';
 export class AuthService {
   private readonly USERS_KEY = 'users';
   private readonly CURRENT_USER_KEY = 'currentUser';
+  private readonly COLLECTORS_KEY = 'collectors';
 
   constructor() {
+    this.initializeDefaultUsers();
     this.initializeCollectors();
   }
 
-  private initializeCollectors(): void {
-    const users = this.getUsers();
-    if (users.length === 0) {
-      const collectors: User[] = [
+  private initializeDefaultUsers(): void {
+    if (!localStorage.getItem(this.USERS_KEY)) {
+      const defaultUsers: User[] = [
         {
           id: '1',
-          email: 'collector1@recyclehub.com',
-          password: 'password123',
-          firstName: 'John',
-          lastName: 'Doe',
-          address: {
-            street: '123 Green Street',
-            city: 'Casablanca',
-            zipCode: '20000'
-          },
-          phoneNumber: '0600000001',
+          email: 'admin@recyclehub.ma',
+          password: 'password123', // En production, utiliser un hash
+          firstName: 'Admin',
+          lastName: 'System',
+          phoneNumber: '0600000000',
           dateOfBirth: new Date('1990-01-01'),
+          address: {
+            street: '123 Rue Mohammed V',
+            city: 'Casablanca',
+            postalCode: '20000', // Changé ici
+            country: 'Maroc'
+          },
           userType: 'collector',
           points: 0
         }
       ];
-      localStorage.setItem(this.USERS_KEY, JSON.stringify(collectors));
+      localStorage.setItem(this.USERS_KEY, JSON.stringify(defaultUsers));
+    }
+  }
+
+  private initializeCollectors() {
+    if (!localStorage.getItem(this.COLLECTORS_KEY)) {
+      const defaultCollectors = [
+        {
+          id: 'collector1',
+          email: 'collector1@recyclehub.ma',
+          firstName: 'Ahmed',
+          lastName: 'Alami',
+          userType: 'collector',
+          city: 'Casablanca'
+        },
+        {
+          id: 'collector2',
+          email: 'collector2@recyclehub.ma',
+          firstName: 'Karim',
+          lastName: 'Bennani',
+          userType: 'collector',
+          city: 'Rabat'
+        }
+      ];
+      localStorage.setItem(this.COLLECTORS_KEY, JSON.stringify(defaultCollectors));
     }
   }
 
@@ -116,18 +142,30 @@ export class AuthService {
     return true;
   }
 
-  deleteAccount(userId: string): Observable<void> {
-    const users = this.getUsers();
-    const userIndex = users.findIndex(u => u.id === userId);
-
+  deleteAccount(userId: string): Observable<boolean> {
+    const users = JSON.parse(localStorage.getItem(this.USERS_KEY) || '[]');
+    const userIndex = users.findIndex((u: User) => u.id === userId);
+    
     if (userIndex === -1) {
-      return throwError(() => new Error('User not found'));
+      return throwError(() => new Error('Utilisateur non trouvé'));
     }
-
+    
     users.splice(userIndex, 1);
     localStorage.setItem(this.USERS_KEY, JSON.stringify(users));
     localStorage.removeItem(this.CURRENT_USER_KEY);
+    return of(true);
+  }
+
+  validateAge(dateOfBirth: Date): boolean {
+    const today = new Date();
+    const birthDate = new Date(dateOfBirth);
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const monthDiff = today.getMonth() - birthDate.getMonth();
     
-    return of(void 0);
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+      age--;
+    }
+    
+    return age >= 18;
   }
 }

@@ -14,6 +14,7 @@ import { CollectionRequest } from '../../models/collection-request.model';
 })
 export class CollectionRequestComponent implements OnInit {
   collectionRequestForm: FormGroup;
+  errorMessage: string = '';
 
   constructor(private fb: FormBuilder, private store: Store) {
     this.collectionRequestForm = this.fb.group({
@@ -141,5 +142,23 @@ export class CollectionRequestComponent implements OnInit {
         }
       });
     }
+  }
+
+  private validateRequestLimit(): boolean {
+    const currentRequests = this.getCurrentRequests();
+    if (currentRequests >= 3) {
+      this.errorMessage = 'Vous avez atteint la limite de 3 demandes simultanées';
+      return false;
+    }
+    return true;
+  }
+
+  private validateTotalWeight(): boolean {
+    const totalWeight = this.calculateTotalWeight();
+    if (totalWeight > 10000) { // 10kg en grammes
+      this.errorMessage = 'Le poids total ne peut pas dépasser 10kg';
+      return false;
+    }
+    return true;
   }
 }

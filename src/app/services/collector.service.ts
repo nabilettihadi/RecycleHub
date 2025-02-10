@@ -10,47 +10,34 @@ import { createCollectionRequest } from '../store/collection/collection.actions'
   providedIn: 'root'
 })
 export class CollectorService {
-  private readonly COLLECTORS_KEY = 'recyclehub_collectors';
+  private readonly COLLECTORS_KEY = 'collectors';
 
   constructor(private store: Store) {
     this.initializeCollectors();
   }
 
-  private initializeCollectors() {
+  private initializeCollectors(): void {
     if (!localStorage.getItem(this.COLLECTORS_KEY)) {
-      const collectors: User[] = [
+      const defaultCollectors: User[] = [
         {
-          email: 'collector1@recyclehub.com',
-          password: 'password123',
+          id: '1',
+          email: 'collector1@recyclehub.ma',
           firstName: 'Mohammed',
           lastName: 'Alami',
-          address: 'Casablanca, Maarif',
-          phone: '0612345678',
-          birthDate: new Date('1990-01-01'),
-          role: 'collecteur'
+          phoneNumber: '0600000001',
+          dateOfBirth: new Date('1990-01-01'),
+          address: {
+            street: '123 Rue Hassan II',
+            city: 'Casablanca',
+            postalCode: '20000',
+            country: 'Maroc'
+          },
+          userType: 'collector',
+          points: 0
         },
-        {
-          email: 'collector2@recyclehub.com',
-          password: 'password123',
-          firstName: 'Ahmed',
-          lastName: 'Benani',
-          address: 'Rabat, Agdal',
-          phone: '0623456789',
-          birthDate: new Date('1988-05-15'),
-          role: 'collecteur'
-        },
-        {
-          email: 'collector3@recyclehub.com',
-          password: 'password123',
-          firstName: 'Karim',
-          lastName: 'Idrissi',
-          address: 'Marrakech, Guéliz',
-          phone: '0634567890',
-          birthDate: new Date('1992-08-20'),
-          role: 'collecteur'
-        }
+        // Ajouter d'autres collecteurs par défaut
       ];
-      localStorage.setItem(this.COLLECTORS_KEY, JSON.stringify(collectors));
+      localStorage.setItem(this.COLLECTORS_KEY, JSON.stringify(defaultCollectors));
     }
   }
 

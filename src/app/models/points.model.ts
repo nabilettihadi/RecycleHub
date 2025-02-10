@@ -29,6 +29,11 @@ export interface PointsTransaction {
     createdAt: Date;
 }
 
+export interface PointsConversion {
+    points: number;
+    value: number;
+}
+
 export const POINTS_RATES: PointsRate = {
     plastique: 2,
     verre: 1,
@@ -41,3 +46,16 @@ export const VOUCHER_RATES: VoucherRate[] = [
     { points: 200, value: 120 },
     { points: 500, value: 350 }
 ];
+
+export const POINTS_CONVERSION_TABLE: PointsConversion[] = [
+    { points: 100, value: 50 },
+    { points: 200, value: 120 },
+    { points: 500, value: 350 }
+];
+
+export const WASTE_POINTS_TABLE = {
+    plastique: 2,
+    verre: 1,
+    papier: 1,
+    metal: 5
+};

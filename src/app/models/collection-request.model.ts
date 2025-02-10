@@ -20,19 +20,21 @@ export interface CollectionRequest {
   userId: string;
   wasteItems: WasteItem[];
   collectionAddress: Address;
-  collectionDate: Date;
+  collectionDate: string;
   timeSlot: string;
   status: RequestStatus;
   createdAt: Date;
   updatedAt: Date;
-  totalWeight?: number; // Optional field to store total weight
+  totalWeight: number;
+  validatedWeight?: number;
+  verifiedType?: WasteType;
+  validationPhotos?: string[];
 }
 
 export interface CollectionRequestForm extends Omit<CollectionRequest, 
     'id' | 
     'userId' | 
     'status' | 
-    'collectorId' | 
     'createdAt' | 
     'updatedAt' | 
     'validationPhotos' | 

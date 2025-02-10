@@ -1,9 +1,42 @@
 import { createSelector } from '@ngrx/store';
 import { AppState } from '../app.state';
+import { CollectionRequest } from '../../models/collection-request.model';
+import { User } from '../../models/user.model';
+import { selectCurrentUser } from '../auth/auth.selectors';
 
-export const selectCollectionState = (state: AppState) => state.collection; // Adjust based on your state structure
+export const selectCollectionState = (state: AppState) => state.collection;
 
-export const selectCollectionRequests = createSelector(
+export const selectAllRequests = createSelector(
   selectCollectionState,
-  (collectionState) => collectionState.collectionRequests // Adjust based on how collection requests are stored in the state
+  (state) => state.collectionRequests
+);
+
+export const selectRequestsByCollectorCity = createSelector(
+  selectAllRequests,
+  selectCurrentUser,
+  (requests: CollectionRequest[], user: User | null) => {
+    if (!user || user.userType !== 'collector') return [];
+    return requests.filter(request => 
+      request.collectionAddress.city.toLowerCase() === user.address.city.toLowerCase()
+    );
+  }
+);
+
+// Ajoutons aussi un sélecteur pour les demandes en attente d'un utilisateur
+export const selectUserPendingRequests = createSelector(
+  selectAllRequests,
+  selectCurrentUser,
+  (requests: CollectionRequest[], user: User | null) => {
+    if (!user) return [];
+    return requests.filter(request => 
+      request.userId === user.id && 
+      request.status === 'en_attente'
+    );
+  }
+);
+
+// Sélecteur pour la demande courante
+export const selectCurrentRequest = createSelector(
+  selectCollectionState,
+  (state) => state.currentRequest
 );

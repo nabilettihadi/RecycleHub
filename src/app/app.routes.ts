@@ -4,6 +4,7 @@ import { RegisterComponent } from './components/auth/register/register.component
 import { authGuard } from './guards/auth.guard';
 import { ProfileComponent } from './components/profile/profile.component';
 import { CollectorDashboardComponent } from './components/collector-dashboard/collector-dashboard.component'; // Importing the component
+import { PointsManagementComponent } from './components/points/points-management.component';
 
 export const routes: Routes = [
   { path: '', redirectTo: '/home', pathMatch: 'full' },
@@ -30,6 +31,11 @@ export const routes: Routes = [
   {
     path: 'profile',
     component: ProfileComponent,
+    canActivate: [authGuard]
+  },
+  {
+    path: 'points',
+    component: PointsManagementComponent,
     canActivate: [authGuard]
   }
 ];

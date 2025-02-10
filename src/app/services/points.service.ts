@@ -16,6 +16,19 @@ export class PointsService {
     private readonly TRANSACTIONS_KEY = 'points_transactions';
     private readonly VOUCHERS_KEY = 'vouchers';
 
+    private readonly POINTS_RATES = {
+        plastique: 2,
+        verre: 1,
+        papier: 1,
+        metal: 5
+    };
+
+    private readonly CONVERSION_RATES = [
+        { points: 100, amount: 50 },
+        { points: 200, amount: 120 },
+        { points: 500, amount: 350 }
+    ];
+
     constructor() {
         this.initializeStorage();
     }
@@ -30,7 +43,13 @@ export class PointsService {
     }
 
     calculatePoints(wasteType: WasteType, weight: number): number {
-        return POINTS_RATES[wasteType] * weight;
+        const pointsPerKg: Record<WasteType, number> = {
+            'plastique': 2,
+            'verre': 1,
+            'papier': 1,
+            'metal': 5
+        };
+        return (weight / 1000) * pointsPerKg[wasteType];
     }
 
     addPointsTransaction(userId: string, collectionRequestId: string, wasteType: WasteType, weight: number, isValidated: boolean): Observable<PointsTransaction> {
@@ -85,6 +104,13 @@ export class PointsService {
         const usedPoints = vouchers.reduce((sum, v) => sum + v.points, 0);
 
         return of(earnedPoints - usedPoints);
+    }
+
+    convertToVoucher(points: number): number {
+        if (points >= 500) return 350;
+        if (points >= 200) return 120;
+        if (points >= 100) return 50;
+        return 0;
     }
 
     convertPointsToVoucher(userId: string, points: number): Observable<Voucher> {        

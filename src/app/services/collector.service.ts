@@ -22,6 +22,7 @@ export class CollectorService {
         {
           id: '1',
           email: 'collector1@recyclehub.ma',
+          password: 'hashedPassword123',
           firstName: 'Mohammed',
           lastName: 'Alami',
           phoneNumber: '0600000001',
@@ -42,6 +43,6 @@ export class CollectorService {
   }
 
   getCollectors(): Observable<User[]> {
-    return this.store.select(selectCollectors); // Update to use NgRx store
+    return this.store.select(selectCollectors);
   }
 }

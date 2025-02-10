@@ -12,7 +12,16 @@
         <div class="flex items-center">
           <div class="ml-3 relative" *ngIf="currentUser$ | async as user">
             <div class="flex items-center space-x-4">
-              <span class="text-gray-700">{{ user.firstName }} {{ user.lastName }}</span>
+              <!-- Photo de profil -->
+              <div class="flex items-center space-x-3">
+                <img [src]="user.profilePicture || 'assets/default-avatar.png'"
+                     alt="Photo de profil"
+                     class="h-10 w-10 rounded-full object-cover border-2 border-green-500">
+                <div class="flex flex-col">
+                  <span class="text-sm font-medium text-gray-700">{{ user.firstName }} {{ user.lastName }}</span>
+                  <span class="text-xs text-gray-500">{{ user.points }} points</span>
+                </div>
+              </div>
               <button (click)="onLogout()" 
                 class="bg-red-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
                 Déconnexion
@@ -26,47 +35,97 @@
 
   <!-- Main Content -->
   <main class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-    <div class="px-4 py-6 sm:px-0">
-      <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-        <!-- Points Card -->
-        <div class="bg-white overflow-hidden shadow rounded-lg">
-          <div class="px-4 py-5 sm:p-6">
-            <dt class="text-sm font-medium text-gray-500 truncate">
-              Points totaux
-            </dt>
-            <dd class="mt-1 text-3xl font-semibold text-gray-900">
-              {{ (currentUser$ | async)?.points || 0 }}
-            </dd>
-          </div>
-        </div>
-
-        <!-- Collection Requests Card -->
-        <div class="bg-white overflow-hidden shadow rounded-lg">
-          <div class="px-4 py-5 sm:p-6">
-            <dt class="text-sm font-medium text-gray-500 truncate">
-              Demandes en cours
-            </dt>
-            <dd class="mt-1 text-3xl font-semibold text-gray-900">
-              0
-            </dd>
-          </div>
-        </div>
-
-        <!-- Quick Actions -->
-        <div class="bg-white overflow-hidden shadow rounded-lg">
-          <div class="px-4 py-5 sm:p-6">
-            <h3 class="text-lg font-medium text-gray-900">Actions rapides</h3>
-            <div class="mt-4 space-y-4">
-              <button routerLink="/collection-request" 
-                class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
-                Nouvelle demande de collecte
-              </button>
-              <button routerLink="/profile" 
-                class="w-full flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
-                Modifier mon profil
-              </button>
+    <!-- Stats Overview -->
+    <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 mb-8">
+      <!-- Points Card -->
+      <div class="bg-white overflow-hidden shadow rounded-lg">
+        <div class="p-5">
+          <div class="flex items-center">
+            <div class="flex-shrink-0 bg-green-500 rounded-md p-3">
+              <svg class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <div class="ml-5 w-0 flex-1">
+              <dl>
+                <dt class="text-sm font-medium text-gray-500 truncate">Points Totaux</dt>
+                <dd class="text-lg font-bold text-gray-900">{{ (currentUser$ | async)?.points || 0 }}</dd>
+              </dl>
             </div>
           </div>
+        </div>
+      </div>
+
+      <!-- Pending Requests Card -->
+      <div class="bg-white overflow-hidden shadow rounded-lg">
+        <div class="p-5">
+          <div class="flex items-center">
+            <div class="flex-shrink-0 bg-blue-500 rounded-md p-3">
+              <svg class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+              </svg>
+            </div>
+            <div class="ml-5 w-0 flex-1">
+              <dl>
+                <dt class="text-sm font-medium text-gray-500 truncate">Demandes en Cours</dt>
+                <dd class="text-lg font-bold text-gray-900">{{ pendingRequestsCount$ | async }}</dd>
+              </dl>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Next Collection Card -->
+      <div class="bg-white overflow-hidden shadow rounded-lg">
+        <div class="p-5">
+          <div class="flex items-center">
+            <div class="flex-shrink-0 bg-yellow-500 rounded-md p-3">
+              <svg class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <div class="ml-5 w-0 flex-1">
+              <dl>
+                <dt class="text-sm font-medium text-gray-500 truncate">Prochaine Collecte</dt>
+                <dd class="text-lg font-bold text-gray-900">{{ nextCollectionDate$ | async }}</dd>
+              </dl>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recent Activity -->
+    <div class="bg-white shadow rounded-lg">
+      <div class="px-4 py-5 sm:p-6">
+        <h3 class="text-lg font-medium text-gray-900">Activité Récente</h3>
+        <div class="mt-4 divide-y divide-gray-200">
+          <ng-container *ngIf="recentRequests$ | async as requests">
+            <div *ngFor="let request of requests" class="py-4">
+              <div class="flex items-center justify-between">
+                <div>
+                  <p class="text-sm font-medium text-gray-900">
+                    Demande de collecte #{{ request.id }}
+                  </p>
+                  <p class="text-sm text-gray-500">
+                    {{ request.collectionDate | date:'dd/MM/yyyy' }} - {{ request.status }}
+                  </p>
+                </div>
+                <div class="flex space-x-2">
+                  <button *ngIf="request.status === 'en_attente'"
+                          (click)="onEditRequest(request)"
+                          class="text-blue-600 hover:text-blue-800">
+                    Modifier
+                  </button>
+                  <button *ngIf="request.status === 'en_attente'"
+                          (click)="onDeleteRequest(request.id)"
+                          class="text-red-600 hover:text-red-800">
+                    Supprimer
+                  </button>
+                </div>
+              </div>
+            </div>
+          </ng-container>
         </div>
       </div>
     </div>

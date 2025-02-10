@@ -1,9 +1,176 @@
-<div>
-  <h2>Collector Dashboard</h2>
-  <div *ngFor="let request of collectionRequests$ | async">
-    <h3>{{ getStreet(request.collectionAddress) }}</h3>
-    <p>Status: {{ request.status }}</p>
-    <button (click)="acceptRequest(request.id)">Accept</button>
-    <button (click)="rejectRequest(request.id)">Reject</button>
+<div class="min-h-screen bg-gray-100">
+  <nav class="bg-white shadow-md">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between h-16">
+        <div class="flex items-center">
+          <h1 class="text-2xl font-bold text-green-600">RecycleHub</h1>
+        </div>
+        
+        <div class="flex items-center">
+          <div class="ml-3 relative" *ngIf="currentUser$ | async as user">
+            <div class="flex items-center space-x-4">
+              <!-- Photo de profil -->
+              <div class="flex items-center space-x-3">
+                <img [src]="user.profilePicture || 'assets/default-avatar.png'"
+                     alt="Photo de profil"
+                     class="h-10 w-10 rounded-full object-cover border-2 border-green-500">
+                <div class="flex flex-col">
+                  <span class="text-sm font-medium text-gray-700">{{ user.firstName }} {{ user.lastName }}</span>
+                  <span class="text-xs text-gray-500">Collecteur</span>
+                </div>
+              </div>
+              <button (click)="onLogout()" 
+                      class="bg-red-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
+                Déconnexion
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </nav>
+  <div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+    <!-- Stats Overview -->
+    <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 mb-8">
+      <!-- Validated Collections -->
+      <div class="bg-white overflow-hidden shadow rounded-lg">
+        <div class="p-5">
+          <div class="flex items-center">
+            <div class="flex-shrink-0 bg-green-500 rounded-md p-3">
+              <svg class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <div class="ml-5 w-0 flex-1">
+              <dl>
+                <dt class="text-sm font-medium text-gray-500 truncate">Collectes Validées</dt>
+                <dd class="text-lg font-bold text-gray-900">{{ validatedCount$ | async }}</dd>
+              </dl>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pending Collections -->
+      <div class="bg-white overflow-hidden shadow rounded-lg">
+        <div class="p-5">
+          <div class="flex items-center">
+            <div class="flex-shrink-0 bg-yellow-500 rounded-md p-3">
+              <svg class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <div class="ml-5 w-0 flex-1">
+              <dl>
+                <dt class="text-sm font-medium text-gray-500 truncate">En Attente</dt>
+                <dd class="text-lg font-bold text-gray-900">{{ pendingCount$ | async }}</dd>
+              </dl>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Total Collected -->
+      <div class="bg-white overflow-hidden shadow rounded-lg">
+        <div class="p-5">
+          <div class="flex items-center">
+            <div class="flex-shrink-0 bg-blue-500 rounded-md p-3">
+              <svg class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+              </svg>
+            </div>
+            <div class="ml-5 w-0 flex-1">
+              <dl>
+                <dt class="text-sm font-medium text-gray-500 truncate">Total Collecté (kg)</dt>
+                <dd class="text-lg font-bold text-gray-900">{{ totalCollected$ | async }}</dd>
+              </dl>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Requests List -->
+    <div class="bg-white shadow rounded-lg">
+      <div class="px-4 py-5 sm:p-6">
+        <h3 class="text-lg font-medium text-gray-900 mb-4">Demandes de Collecte</h3>
+        
+        <div class="flex gap-4 mb-6">
+          <button *ngFor="let status of ['en_attente', 'occupee', 'en_cours', 'validee', 'rejetee']"
+                  (click)="filterByStatus(status)"
+                  [class.bg-green-600]="currentFilter === status"
+                  class="px-4 py-2 rounded-full text-sm font-medium text-white bg-gray-500 hover:bg-green-600">
+            {{ status | titlecase }}
+          </button>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="min-w-full divide-y divide-gray-200">
+            <thead>
+              <tr>
+                <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Date
+                </th>
+                <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Adresse
+                </th>
+                <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Type de Déchets
+                </th>
+                <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Poids Estimé
+                </th>
+                <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Statut
+                </th>
+                <th class="px-6 py-3 bg-gray-50"></th>
+              </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+              <tr *ngFor="let request of filteredRequests$ | async">
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                  {{ request.collectionDate | date:'dd/MM/yyyy' }}
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                  {{ request.collectionAddress.street }}, {{ request.collectionAddress.city }}
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                  <div *ngFor="let item of request.wasteItems">
+                    {{ item.type }} ({{ item.weight }}g)
+                  </div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                  {{ getTotalWeight(request) }}kg
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <span [class]="getStatusClass(request.status)">
+                    {{ request.status }}
+                  </span>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                  <div class="flex justify-end space-x-2">
+                    <button *ngIf="request.status === 'en_attente'"
+                            (click)="acceptRequest(request.id)"
+                            class="text-green-600 hover:text-green-900">
+                      Accepter
+                    </button>
+                    <button *ngIf="request.status === 'occupee'"
+                            (click)="startCollection(request.id)"
+                            class="text-blue-600 hover:text-blue-900">
+                      Démarrer
+                    </button>
+                    <button *ngIf="request.status === 'en_cours'"
+                            (click)="openValidationModal(request)"
+                            class="text-yellow-600 hover:text-yellow-900">
+                      Valider
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
   </div>
 </div>

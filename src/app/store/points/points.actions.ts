@@ -18,4 +18,13 @@ export const convertPointsFailure = createAction(
 export const updateUserPoints = createAction(
   '[Points] Update User Points',
   props<{ points: number }>()
+);
+
+export const updatePointsAfterCollection = createAction(
+  '[Points] Update After Collection',
+  props<{ 
+    userId: string,
+    wasteType: string,
+    weight: number 
+  }>()
 ); 

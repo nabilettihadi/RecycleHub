@@ -1,84 +1,60 @@
 import { Injectable } from '@angular/core';
-import { Observable, of } from 'rxjs';
-import { CollectionRequest, RequestStatus } from '../models/collection-request.model';
+import { User } from '../models/user.model'; // Corrected import path
 import { Store } from '@ngrx/store';
-import { User } from '../models/user.model';
-import { selectCollectors } from '../store/collection/collection.selectors';    
-import { AppState } from '../store/app.state';
+import { Observable } from 'rxjs';
+import { selectCollectors } from '../store/collection/collection.selectors'; // Ensure this selector is defined
+import { CollectionRequest } from '../models/collection-request.model';
+import { createCollectionRequest } from '../store/collection/collection.actions';
 
 @Injectable({
   providedIn: 'root'
 })
 export class CollectorService {
-  private collectors: User[] = [
-    {
-      id: '1',
-      firstName: 'John',
-      lastName: 'Doe',
-      email: 'john@example.com',
-      phoneNumber: '0612345678',
-      address: {
-        street: '123 Main St',
-        city: 'Casablanca',
-        zipCode: '20000'
-      },
-      dateOfBirth: new Date('1990-01-01'),
-      role: 'collector',
-      points: 0
-    }
-  ];
+  private readonly COLLECTORS_KEY = 'recyclehub_collectors';
 
-  constructor(private store: Store<AppState>) {}
+  constructor(private store: Store) {
+    this.initializeCollectors();
+  }
+
+  private initializeCollectors() {
+    if (!localStorage.getItem(this.COLLECTORS_KEY)) {
+      const collectors: User[] = [
+        {
+          email: 'collector1@recyclehub.com',
+          password: 'password123',
+          firstName: 'Mohammed',
+          lastName: 'Alami',
+          address: 'Casablanca, Maarif',
+          phone: '0612345678',
+          birthDate: new Date('1990-01-01'),
+          role: 'collecteur'
+        },
+        {
+          email: 'collector2@recyclehub.com',
+          password: 'password123',
+          firstName: 'Ahmed',
+          lastName: 'Benani',
+          address: 'Rabat, Agdal',
+          phone: '0623456789',
+          birthDate: new Date('1988-05-15'),
+          role: 'collecteur'
+        },
+        {
+          email: 'collector3@recyclehub.com',
+          password: 'password123',
+          firstName: 'Karim',
+          lastName: 'Idrissi',
+          address: 'Marrakech, Guéliz',
+          phone: '0634567890',
+          birthDate: new Date('1992-08-20'),
+          role: 'collecteur'
+        }
+      ];
+      localStorage.setItem(this.COLLECTORS_KEY, JSON.stringify(collectors));
+    }
+  }
 
   getCollectors(): Observable<User[]> {
-    return of(this.collectors);
-  }
-
-  addCollector(collector: User): Observable<User> {
-    this.collectors.push(collector);
-    return of(collector);
-  }
-
-  updateCollector(id: string, updates: Partial<User>): Observable<User | undefined> {
-    const index = this.collectors.findIndex(c => c.id === id);
-    if (index !== -1) {
-      this.collectors[index] = { ...this.collectors[index], ...updates };
-      return of(this.collectors[index]);
-    }
-    return of(undefined);
-  }
-
-  getCurrentRequestsCount(userId: string): number {
-    const requests = this.getCollectionRequests();
-    return requests.filter(request => request.userId === userId && request.status === 'en_attente').length;
-  }
-
-  calculateTotalWeight(userId: string): number {
-    const requests = this.getCollectionRequests();
-    return requests
-      .filter(request => request.userId === userId && request.status === 'en_attente')
-      .reduce((total, request) => total + request.wasteItems.reduce((sum, item) => sum + item.weight, 0), 0);
-  }
-
-  updateCollectionRequestStatus(requestId: string, newStatus: RequestStatus): Observable<CollectionRequest | undefined> {
-    const requests = this.getCollectionRequests(); // Assume this method retrieves collection requests
-    const requestIndex = requests.findIndex(r => r.id === requestId);
-    
-    if (requestIndex !== -1) {
-        requests[requestIndex].status = newStatus;
-        localStorage.setItem('collection_requests', JSON.stringify(requests)); // Save updated requests
-        return of(requests[requestIndex]);
-    }
-    return of(undefined);
-  }
-
-  getCollectionRequests(): CollectionRequest[] {
-    return JSON.parse(localStorage.getItem('collection_requests') || '[]');
-  }
-
-  deleteCollector(id: string): Observable<boolean> {
-    const initialLength = this.collectors.length;
-    this.collectors = this.collectors.filter(c => c.id !== id);
-    return of(this.collectors.length !== initialLength);
+    return this.store.select(selectCollectors); // Update to use NgRx store
   }
 }

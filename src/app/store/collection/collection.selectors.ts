@@ -1,25 +1,9 @@
-import { createFeatureSelector, createSelector } from '@ngrx/store';
-import { CollectionState } from './collection.reducer';
-import { User } from '../../models/user.model';
+import { createSelector } from '@ngrx/store';
+import { AppState } from '../app.state';
 
-export const selectCollectionState = createFeatureSelector<CollectionState>('collection');
+export const selectCollectionState = (state: AppState) => state.collection; // Adjust based on your state structure
 
-export const selectCollectors = createSelector(
+export const selectCollectionRequests = createSelector(
   selectCollectionState,
-  (state: CollectionState) => state.collectors
-);
-
-export const selectCollectionRequests = createSelector( 
-  selectCollectionState,
-  (state: CollectionState) => state.requests
-);
-
-export const selectLoading = createSelector( 
-  selectCollectionState,
-  (state: CollectionState) => state.loading
-);
-
-export const selectError = createSelector( 
-  selectCollectionState,
-  (state: CollectionState) => state.error
+  (collectionState) => collectionState.collectionRequests // Adjust based on how collection requests are stored in the state
 );

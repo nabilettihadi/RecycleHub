@@ -4,7 +4,7 @@ import { CommonModule } from '@angular/common';
 import { Store } from '@ngrx/store';
 import { RouterLink } from '@angular/router';
 import { login } from '../../../store/auth/auth.actions';
-import { selectAuthState } from '../../../store/auth/auth.selectors';
+import { selectAuthState, selectIsAuthenticated } from '../../../store/auth/auth.selectors';
 
 @Component({
   selector: 'app-login',
@@ -20,6 +20,7 @@ export class LoginComponent implements OnInit {
   loginForm: FormGroup;
   loading$ = this.store.select(state => selectAuthState(state).loading);
   error$ = this.store.select(state => selectAuthState(state).error);
+  isAuthenticated$ = this.store.select(selectIsAuthenticated);
 
   constructor() {
     this.loginForm = this.fb.group({

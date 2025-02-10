@@ -9,10 +9,7 @@
           <h1 class="text-3xl font-bold text-green-600">RecycleHub</h1>
         </div>
         <div class="flex items-center space-x-6">
-          <ng-container *ngIf="isAuthenticated; else guestLinks">
-            <a routerLink="/collection-request" class="text-gray-700 hover:text-green-600 transition duration-300 font-medium">
-              Nouvelle Collecte
-            </a>
+            <ng-container *ngIf="isAuthenticated$ | async; else guestLinks">
             <a routerLink="/dashboard" class="text-gray-700 hover:text-green-600 transition duration-300 font-medium">
               Tableau de Bord
             </a>

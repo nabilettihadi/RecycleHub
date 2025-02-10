@@ -10,11 +10,14 @@ import { AppState } from '../../store/app.state';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { selectCurrentUser } from '../../store/auth/auth.selectors';
 import { logout } from '../../store/auth/auth.actions';
+import { RouterModule } from '@angular/router';
+import { NavbarComponent } from '../shared/navbar/navbar.component';
+import { FooterComponent } from '../shared/footer/footer.component';
 
 @Component({
   selector: 'app-collector-dashboard',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, RouterModule, NavbarComponent, FooterComponent],
   templateUrl: './collector-dashboard.component.html',
   styleUrls: ['./collector-dashboard.component.css']
 })

@@ -7,11 +7,13 @@ import { selectUserPendingRequests } from '../../store/collection/collection.sel
 import { logout } from '../../store/auth/auth.actions';
 import { map } from 'rxjs/operators';
 import { DEFAULT_AVATAR_URL } from '../../shared/constants';
+import { NavbarComponent } from '../shared/navbar/navbar.component';
+import { FooterComponent } from '../shared/footer/footer.component';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, NavbarComponent, FooterComponent],
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.css']
 })

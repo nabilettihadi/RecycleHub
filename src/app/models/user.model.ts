@@ -19,5 +19,10 @@ export interface User {
     profilePicture?: string;
     userType: UserType;
     points: number;
+    pointsHistory: Array<{
+        date: Date;
+        points: number;
+        value: number;
+    }>;
     activeRequests?: string[];
 }

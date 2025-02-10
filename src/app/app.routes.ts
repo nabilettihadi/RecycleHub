@@ -3,8 +3,6 @@ import { LoginComponent } from './components/auth/login/login.component';
 import { RegisterComponent } from './components/auth/register/register.component';
 import { authGuard } from './guards/auth.guard';
 import { ProfileComponent } from './components/profile/profile.component';
-import { CollectorDashboardComponent } from './components/collector-dashboard/collector-dashboard.component'; // Importing the component
-import { PointsManagementComponent } from './components/points/points-management.component';
 import { collectorGuard } from './guards/collector.guard';
 
 export const routes: Routes = [
@@ -13,7 +11,8 @@ export const routes: Routes = [
   { path: 'register', component: RegisterComponent },
   { 
     path: 'collector-dashboard',
-    component: CollectorDashboardComponent,
+    loadComponent: () => import('./components/collector-dashboard/collector-dashboard.component')
+      .then(m => m.CollectorDashboardComponent),
     canActivate: [authGuard, collectorGuard]
   },
   { 
@@ -22,11 +21,14 @@ export const routes: Routes = [
   },
   {
     path: 'collection-request',
-    loadComponent: () => import('./components/collection-request/collection-request.component').then(m => m.CollectionRequestComponent)
+    loadComponent: () => import('./components/collection-request/collection-request.component')
+      .then(m => m.CollectionRequestComponent),
+    canActivate: [authGuard]
   },
   {
     path: 'dashboard',
-    loadComponent: () => import('./components/dashboard/dashboard.component').then(m => m.DashboardComponent),
+    loadComponent: () => import('./components/dashboard/dashboard.component')
+      .then(m => m.DashboardComponent),
     canActivate: [authGuard]
   },
   {
@@ -36,7 +38,14 @@ export const routes: Routes = [
   },
   {
     path: 'points',
-    component: PointsManagementComponent,
+    loadComponent: () => import('./components/points/points.component')
+      .then(m => m.PointsComponent),
     canActivate: [authGuard]
+  },
+  {
+    path: 'collector-profile',
+    loadComponent: () => import('./components/collector-profile/collector-profile.component')
+      .then(m => m.CollectorProfileComponent),
+    canActivate: [authGuard, collectorGuard]
   }
 ];

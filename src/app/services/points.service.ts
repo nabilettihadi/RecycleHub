@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { Store } from '@ngrx/store';
 import { Observable, of, throwError } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { 
@@ -9,6 +10,7 @@ import {
 } from '../models/points.model';
 import { WasteType } from '../models/collection-request.model';
 import { WasteItem } from '../models/collection-request.model';
+import { CollectionRequest } from '../models/collection-request.model';
 
 @Injectable({
     providedIn: 'root'
@@ -17,20 +19,7 @@ export class PointsService {
     private readonly TRANSACTIONS_KEY = 'points_transactions';
     private readonly VOUCHERS_KEY = 'vouchers';
 
-    private readonly POINTS_RATES = {
-        plastique: 2,
-        verre: 1,
-        papier: 1,
-        metal: 5
-    };
-
-    private readonly CONVERSION_RATES = [
-        { points: 100, amount: 50 },
-        { points: 200, amount: 120 },
-        { points: 500, amount: 350 }
-    ];
-
-    constructor() {
+    constructor(private store: Store) {
         this.initializeStorage();
     }
 
@@ -43,18 +32,36 @@ export class PointsService {
         }
     }
 
-    calculatePoints(wasteItems: WasteItem[]): number {
-        return wasteItems.reduce((total, item) => {
-            const rate = this.POINTS_RATES[item.type as keyof typeof this.POINTS_RATES];
-            return total + (rate * item.weight / 1000); // Convertir en kg
+    calculatePoints(wasteType: string, weight: number): number {
+        const pointsPerKg: Record<string, number> = {
+            'plastique': 2,
+            'verre': 1,
+            'papier': 1,
+            'metal': 5
+        };
+        return Math.floor((weight / 1000) * (pointsPerKg[wasteType] || 0));
+    }
+
+    calculateTotalPoints(request: CollectionRequest): number {
+        return request.wasteItems.reduce((total, item) => {
+            return total + this.calculatePoints(item.type, item.weight);
         }, 0);
+    }
+
+    getAvailableVouchers(points: number): Array<{points: number, value: number}> {
+        const vouchers = [
+            { points: 500, value: 350 },
+            { points: 200, value: 120 },
+            { points: 100, value: 50 }
+        ];
+        return vouchers.filter(voucher => points >= voucher.points);
     }
 
     addPointsTransaction(userId: string, collectionRequestId: string, wasteType: WasteType, weight: number, isValidated: boolean): Observable<PointsTransaction> {
         if (!isValidated) {
             return throwError(() => new Error('Collection must be validated to award points'));
         }
-        const pointsEarned = this.calculatePoints([{ type: wasteType, weight } as WasteItem]);        
+        const pointsEarned = this.calculatePoints(wasteType, weight);        
         // Award points only if the collection is validated
         if (isValidated) {
             const transaction: PointsTransaction = {

@@ -1,27 +1,40 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, FormArray, Validators, ReactiveFormsModule, AbstractControl } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import { createCollectionRequest } from '../../store/collection/collection.actions';
 import { CollectionRequest } from '../../models/collection-request.model';
-import { selectUserActiveRequests } from '../../store/auth/auth.selectors';
+import { selectUserActiveRequests, selectCurrentUser } from '../../store/auth/auth.selectors';
 import { first } from 'rxjs/operators';
 import { Observable } from 'rxjs';
 import { AppState } from '../../store/app.state';
+import { NavbarComponent } from '../shared/navbar/navbar.component';
+import { FooterComponent } from '../shared/footer/footer.component';
 
 @Component({
   selector: 'app-collection-request',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [
+    CommonModule, 
+    ReactiveFormsModule, 
+    NavbarComponent,
+    FooterComponent
+  ],
   templateUrl: './collection-request.component.html',
   styleUrls: ['./collection-request.component.css']
 })
 export class CollectionRequestComponent implements OnInit {
+  private store = inject(Store<AppState>);
+  private fb = inject(FormBuilder);
+
   collectionRequestForm: FormGroup;
   errorMessage: string = '';
   activeRequests$!: Observable<string[]>;
+  currentUser$ = this.store.select(selectCurrentUser);
+  today = new Date().toISOString().split('T')[0];
+  isSubmitting = false;
 
-  constructor(private fb: FormBuilder, private store: Store<AppState>) {
+  constructor() {
     this.collectionRequestForm = this.fb.group({
       wasteItems: this.fb.array([]),
       collectionAddress: this.fb.group({

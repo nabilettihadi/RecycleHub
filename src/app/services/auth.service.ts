@@ -13,45 +13,24 @@ export class AuthService {
   private readonly USERS_KEY = 'users';
   private readonly CURRENT_USER_KEY = 'currentUser';
   private readonly COLLECTORS_KEY = 'collectors';
+  private readonly INITIALIZED_KEY = 'app_initialized';
 
   constructor() {
-    // En développement, réinitialiser le storage pour avoir des données fraîches
-    this.resetStorage();
-  }
-
-  private initializeDefaultUsers(): void {
-    if (!localStorage.getItem(this.USERS_KEY)) {
-      const defaultUsers: User[] = [
-        {
-          id: '1',
-          email: 'admin@recyclehub.ma',
-          password: 'password123', // En production, utiliser un hash
-          firstName: 'Admin',
-          lastName: 'System',
-          phoneNumber: '0600000000',
-          dateOfBirth: new Date('1990-01-01'),
-          address: {
-            street: '123 Rue Mohammed V',
-            city: 'Casablanca',
-            postalCode: '20000', // Changé ici
-            country: 'Maroc'
-          },
-          userType: 'collector',
-          points: 0
-        }
-      ];
-      localStorage.setItem(this.USERS_KEY, JSON.stringify(defaultUsers));
+    // Initialiser les données seulement si ce n'est pas déjà fait
+    if (!localStorage.getItem(this.INITIALIZED_KEY)) {
+      this.initializeDefaultData();
+      localStorage.setItem(this.INITIALIZED_KEY, 'true');
     }
   }
 
-  private initializeCollectors() {
-    // Vérifier si les collecteurs existent déjà
+  private initializeDefaultData(): void {
+    // Initialiser les collecteurs seulement s'ils n'existent pas
     if (!localStorage.getItem(this.COLLECTORS_KEY)) {
       const defaultCollectors: Collector[] = [
         {
           id: '1',
           email: 'collector1@recyclehub.ma',
-          password: 'password123', // Mot de passe en clair pour le test
+          password: 'password123',
           firstName: 'Ahmed',
           lastName: 'Alami',
           phoneNumber: '0600000001',
@@ -66,9 +45,23 @@ export class AuthService {
           points: 0
         }
       ];
-
-      console.log('Initialisation des collecteurs:', defaultCollectors);
       localStorage.setItem(this.COLLECTORS_KEY, JSON.stringify(defaultCollectors));
+    }
+
+    // Initialiser les utilisateurs seulement s'ils n'existent pas
+    if (!localStorage.getItem(this.USERS_KEY)) {
+      const defaultUsers: User[] = [];
+      localStorage.setItem(this.USERS_KEY, JSON.stringify(defaultUsers));
+    }
+
+    // Initialiser les demandes de collecte seulement si elles n'existent pas
+    if (!localStorage.getItem('collection_requests')) {
+      localStorage.setItem('collection_requests', JSON.stringify([]));
+    }
+
+    // Initialiser l'historique des points seulement s'il n'existe pas
+    if (!localStorage.getItem('points_history')) {
+      localStorage.setItem('points_history', JSON.stringify([]));
     }
   }
 
@@ -122,7 +115,8 @@ export class AuthService {
     if (collector) {
       const userCollector: User = {
         ...collector,
-        points: 0
+        points: 0,
+        pointsHistory: [],
       };
       console.log('Conversion en User:', userCollector);
       localStorage.setItem(this.CURRENT_USER_KEY, JSON.stringify(userCollector));
@@ -217,21 +211,12 @@ export class AuthService {
     return age >= 18;
   }
 
-  private initializeCollectionRequests() {
-    const COLLECTION_REQUESTS_KEY = 'collection_requests';
-    if (!localStorage.getItem(COLLECTION_REQUESTS_KEY)) {
-      const defaultRequests: CollectionRequest[] = [];
-      localStorage.setItem(COLLECTION_REQUESTS_KEY, JSON.stringify(defaultRequests));
-    }
-  }
-
   resetStorage(): void {
-    localStorage.removeItem(this.COLLECTORS_KEY);
-    localStorage.removeItem(this.USERS_KEY);
-    localStorage.removeItem(this.CURRENT_USER_KEY);
-    this.initializeCollectors();
-    this.initializeDefaultUsers();
-    this.initializeCollectionRequests();
-    console.log('Storage réinitialisé');
+    // Ne réinitialiser que si explicitement demandé (par exemple pour le développement)
+    if (confirm('Êtes-vous sûr de vouloir réinitialiser toutes les données ?')) {
+      localStorage.clear();
+      this.initializeDefaultData();
+      console.log('Storage réinitialisé');
+    }
   }
 }

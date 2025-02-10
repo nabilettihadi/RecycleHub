@@ -1,0 +1,35 @@
+<div class="min-h-screen bg-gray-100 flex flex-col">
+  <app-navbar [user]="currentUser$ | async"></app-navbar>
+  
+  <main class="flex-grow">
+    <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+      <!-- Points actuels -->
+      <div class="bg-white shadow overflow-hidden sm:rounded-lg p-6">
+        <h2 class="text-2xl font-semibold text-gray-900 mb-6">Mes Points</h2>
+        
+        <div class="bg-green-50 rounded-lg p-6 text-center mb-8">
+          <p class="text-4xl font-bold text-green-600">
+            {{ (currentUser$ | async)?.points || 0 }}
+          </p>
+          <p class="text-sm text-gray-600">Points disponibles</p>
+        </div>
+
+        <!-- Tableau de conversion -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div *ngFor="let rate of conversionRates" 
+               class="bg-white p-6 rounded-lg shadow text-center">
+            <h3 class="text-lg font-medium text-gray-900">{{ rate.points }} points</h3>
+            <p class="text-2xl font-bold text-green-600 my-2">{{ rate.amount }} Dh</p>
+            <button (click)="convertPoints(rate.points, rate.amount)"
+                    [disabled]="!(hasEnoughPoints$(rate.points) | async)"
+                    class="bg-green-600 text-white px-4 py-2 rounded-full hover:bg-green-700 disabled:opacity-50">
+              Convertir
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <app-footer></app-footer>
+</div>

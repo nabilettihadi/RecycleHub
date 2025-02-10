@@ -3,55 +3,84 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { selectCurrentUser } from '../../store/auth/auth.selectors';
-import { selectUserPendingRequests } from '../../store/collection/collection.selectors';
 import { logout } from '../../store/auth/auth.actions';
 import { map } from 'rxjs/operators';
 import { DEFAULT_AVATAR_URL } from '../../shared/constants';
 import { NavbarComponent } from '../shared/navbar/navbar.component';
 import { FooterComponent } from '../shared/footer/footer.component';
+import { AppState } from '../../store/app.state';
+import { CollectionRequest } from '../../models/collection-request.model';
+import { CollectionRequestService } from '../../services/collection-request.service';
+import { Observable, of } from 'rxjs';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
   imports: [CommonModule, RouterModule, NavbarComponent, FooterComponent],
-  templateUrl: './dashboard.component.html',
-  styleUrls: ['./dashboard.component.css']
+  templateUrl: './dashboard.component.html'
 })
 export class DashboardComponent implements OnInit {
-  private store = inject(Store);
+  private store = inject(Store<AppState>);
+  private collectionService = inject(CollectionRequestService);
   
   currentUser$ = this.store.select(selectCurrentUser);
-  pendingRequests$ = this.store.select(selectUserPendingRequests);
+  requests: CollectionRequest[] = [];
   
-  pendingRequestsCount$ = this.pendingRequests$.pipe(
-    map(requests => requests.length)
-  );
-  
-  nextCollectionDate$ = this.pendingRequests$.pipe(
-    map(requests => {
-      const nextRequest = requests
-        .sort((a, b) => new Date(a.collectionDate).getTime() - new Date(b.collectionDate).getTime())[0];
-      return nextRequest ? new Date(nextRequest.collectionDate).toLocaleDateString() : 'Aucune';
-    })
-  );
-
-  recentRequests$ = this.pendingRequests$.pipe(
-    map(requests => requests.slice(0, 5))
-  );
+  pendingRequestsCount$ = of(0);
+  nextCollectionDate$ = of('Aucune');
+  recentRequests$ = of<CollectionRequest[]>([]);
 
   defaultAvatarUrl = DEFAULT_AVATAR_URL;
 
-  ngOnInit(): void {}
+  ngOnInit(): void {
+    this.currentUser$.subscribe(user => {
+      if (user) {
+        // Récupérer les requêtes de l'utilisateur
+        this.requests = this.collectionService.getUserRequests(user.id);
+        
+        // Mettre à jour les observables
+        this.updateObservables();
+      }
+    });
+  }
+
+  private updateObservables(): void {
+    // Mettre à jour le nombre de requêtes en attente
+    this.pendingRequestsCount$ = of(
+      this.requests.filter(r => r.status === 'en_attente').length
+    );
+
+    // Mettre à jour la prochaine date de collecte
+    this.nextCollectionDate$ = of(this.getNextCollectionDate());
+
+    // Mettre à jour les requêtes récentes
+    this.recentRequests$ = of(
+      this.requests
+        .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
+        .slice(0, 5)
+    );
+  }
+
+  private getNextCollectionDate(): string {
+    const pendingRequests = this.requests.filter(r => r.status === 'en_attente');
+    if (pendingRequests.length === 0) return 'Aucune';
+
+    const nextRequest = pendingRequests
+      .sort((a, b) => a.collectionDate.getTime() - b.collectionDate.getTime())[0];
+    return nextRequest.collectionDate.toLocaleDateString();
+  }
 
   onLogout(): void {
     this.store.dispatch(logout());
   }
 
-  onEditRequest(request: any): void {
+  onEditRequest(request: CollectionRequest): void {
     // Implémenter la logique de modification
+    console.log('Édition de la requête:', request.id);
   }
 
   onDeleteRequest(requestId: string): void {
     // Implémenter la logique de suppression
+    console.log('Suppression de la requête:', requestId);
   }
 }

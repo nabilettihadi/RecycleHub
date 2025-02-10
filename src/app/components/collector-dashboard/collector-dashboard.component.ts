@@ -1,6 +1,6 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs';
+import { Observable, of } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { CollectionRequest, Address, RequestStatus } from '../../models/collection-request.model';
 import { updateCollectionRequest } from '../../store/collection/collection.actions';
@@ -13,6 +13,7 @@ import { logout } from '../../store/auth/auth.actions';
 import { RouterModule } from '@angular/router';
 import { NavbarComponent } from '../shared/navbar/navbar.component';
 import { FooterComponent } from '../shared/footer/footer.component';
+import { CollectionRequestService } from '../../services/collection-request.service';
 
 @Component({
   selector: 'app-collector-dashboard',
@@ -22,7 +23,8 @@ import { FooterComponent } from '../shared/footer/footer.component';
   styleUrls: ['./collector-dashboard.component.css']
 })
 export class CollectorDashboardComponent implements OnInit {
-  private store = inject(Store);
+  private store = inject(Store<AppState>);
+  private collectionService = inject(CollectionRequestService);
   
   requests$ = this.store.select(selectRequestsByCollectorCity);
   currentFilter = 'en_attente';
@@ -47,10 +49,38 @@ export class CollectorDashboardComponent implements OnInit {
   );
 
   currentUser$ = this.store.select(selectCurrentUser);
+  availableRequests: CollectionRequest[] = [];
+  
+  pendingRequestsCount$: Observable<number> = of(0);
+  totalWeight$: Observable<number> = of(0);
+  recentRequests$: Observable<CollectionRequest[]> = of([]);
 
   defaultAvatarUrl = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9ImN1cnJlbnRDb2xvciIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGNsYXNzPSJmZWF0aGVyIGZlYXRoZXItdXNlciI+PHBhdGggZD0iTTIwIDIxdi0yYTQgNCAwIDAgMC00LTRIOGE0IDQgMCAwIDAtNCA0djIiPjwvcGF0aD48Y2lyY2xlIGN4PSIxMiIgY3k9IjciIHI9IjQiPjwvY2lyY2xlPjwvc3ZnPg==';
 
-  ngOnInit(): void {}
+  ngOnInit(): void {
+    this.currentUser$.subscribe(user => {
+      if (user) {
+        this.availableRequests = this.collectionService.getRequestsByCity(user.address.city);
+        this.updateObservables();
+      }
+    });
+  }
+
+  private updateObservables(): void {
+    const pendingRequests = this.availableRequests.filter(r => r.status === 'en_attente');
+    
+    this.pendingRequestsCount$ = of(pendingRequests.length);
+    
+    this.totalWeight$ = of(
+      pendingRequests.reduce((total, req) => total + req.totalWeight, 0) / 1000
+    );
+    
+    this.recentRequests$ = of(
+      this.availableRequests
+        .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
+        .slice(0, 5)
+    );
+  }
 
   filterByStatus(status: string): void {
     this.currentFilter = status;
@@ -71,16 +101,24 @@ export class CollectorDashboardComponent implements OnInit {
     return `px-2 py-1 text-xs font-medium rounded-full ${classes[status as keyof typeof classes]}`;
   }
 
-  acceptRequest(requestId: string): void {
-    // Implémenter la logique d'acceptation
+  onAcceptRequest(request: CollectionRequest): void {
+    this.collectionService.updateRequestStatus(request.id, 'occupee' as RequestStatus);
+    this.updateObservables();
   }
 
-  startCollection(requestId: string): void {
-    // Implémenter la logique de démarrage
+  onRejectRequest(request: CollectionRequest): void {
+    this.collectionService.updateRequestStatus(request.id, 'rejetee' as RequestStatus);
+    this.updateObservables();
   }
 
-  openValidationModal(request: CollectionRequest): void {
-    // Implémenter la logique d'ouverture du modal de validation
+  onStartCollection(request: CollectionRequest): void {
+    this.collectionService.updateRequestStatus(request.id, 'en_cours' as RequestStatus);
+    this.updateObservables();
+  }
+
+  onValidateCollection(request: CollectionRequest): void {
+    this.collectionService.validateCollection(request.id);
+    this.updateObservables();
   }
 
   getCurrentCollectorCity(): string {
@@ -112,10 +150,6 @@ export class CollectorDashboardComponent implements OnInit {
       requestId, 
       request: { status: 'occupee' } 
     }));
-  }
-
-  validateCollection(requestId: string): void {
-    // Implémentation de la validation de la collecte
   }
 
   closeValidationModal(): void {

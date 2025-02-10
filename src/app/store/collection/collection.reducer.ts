@@ -12,19 +12,19 @@ export const initialState: CollectionStateModel = {
 
 export const collectionReducer = createReducer(
   initialState,
-  on(CollectionActions.loadRequests, state => ({
+  on(CollectionActions.createCollectionRequest, (state) => ({
     ...state,
     loading: true,
     error: null
   })),
-  on(CollectionActions.loadRequestsSuccess, (state, { requests }) => ({
+  on(CollectionActions.createCollectionRequestSuccess, (state, { request }) => ({
     ...state,
-    collectionRequests: requests,
+    collectionRequests: [...state.collectionRequests, request],
     loading: false
   })),
-  on(CollectionActions.loadRequestsFailure, (state, { error }) => ({
+  on(CollectionActions.createCollectionRequestFailure, (state, { error }) => ({
     ...state,
-    loading: false,
-    error
+    error,
+    loading: false
   }))
 ); 

@@ -8,7 +8,7 @@ export const selectCollectionState = createFeatureSelector<CollectionStateModel>
 
 export const selectAllRequests = createSelector(
   selectCollectionState,
-  (state: CollectionStateModel) => state?.collectionRequests || []
+  (state: CollectionStateModel) => state.collectionRequests
 );
 
 export const selectRequestsByCollectorCity = createSelector(
@@ -49,4 +49,13 @@ export const selectCollectors = createSelector(
 export const selectCollectionRequests = createSelector(
   selectCollectionState,
   (state) => state.collectionRequests
+);
+
+export const selectUserRequests = createSelector(
+  selectAllRequests,
+  selectCurrentUser,
+  (requests, user) => {
+    if (!user) return [];
+    return requests.filter(request => request.userId === user.id);
+  }
 );

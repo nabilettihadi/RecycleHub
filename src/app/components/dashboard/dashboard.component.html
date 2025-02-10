@@ -75,10 +75,23 @@
                 <div class="flex items-center justify-between">
                   <div>
                     <p class="text-sm font-medium text-gray-900">
-                      Demande de collecte #{{ request.id }}
+                      Demande de collecte #{{ request.id.slice(0, 8) }}
                     </p>
                     <p class="text-sm text-gray-500">
-                      {{ request.collectionDate | date:'dd/MM/yyyy' }} - {{ request.status }}
+                      Date de collecte: {{ request.collectionDate | date:'dd/MM/yyyy' }}
+                    </p>
+                    <p class="text-sm text-gray-500">
+                      Adresse: {{ request.collectionAddress.street }}, {{ request.collectionAddress.city }}
+                    </p>
+                    <p class="text-sm text-gray-500">
+                      Poids total: {{ request.totalWeight / 1000 }} kg
+                    </p>
+                    <p class="text-sm" [ngClass]="{
+                      'text-yellow-600': request.status === 'en_attente',
+                      'text-green-600': request.status === 'validee',
+                      'text-red-600': request.status === 'rejetee'
+                    }">
+                      Statut: {{ request.status }}
                     </p>
                   </div>
                   <div class="flex space-x-2">

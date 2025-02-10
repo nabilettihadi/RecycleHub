@@ -3,7 +3,7 @@ export type WasteType = 'plastique' | 'verre' | 'papier' | 'metal';
 export type RequestStatus = 'en_attente' | 'occupee' | 'en_cours' | 'validee' | 'rejetee';
 
 export interface WasteItem {
-    type: WasteType;
+    type: string;
     weight: number;
     photos?: string[];
 }
@@ -12,7 +12,7 @@ export interface Address {
   street: string;
   city: string;
   postalCode: string;
-  country?: string;
+  country: string;
 }
 
 export interface CollectionRequest {
@@ -20,7 +20,7 @@ export interface CollectionRequest {
   userId: string;
   wasteItems: WasteItem[];
   collectionAddress: Address;
-  collectionDate: string;
+  collectionDate: Date;
   timeSlot: string;
   status: RequestStatus;
   createdAt: Date;

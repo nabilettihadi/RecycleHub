@@ -8,6 +8,7 @@ import {
     VOUCHER_RATES 
 } from '../models/points.model';
 import { WasteType } from '../models/collection-request.model';
+import { WasteItem } from '../models/collection-request.model';
 
 @Injectable({
     providedIn: 'root'
@@ -42,21 +43,18 @@ export class PointsService {
         }
     }
 
-    calculatePoints(wasteType: WasteType, weight: number): number {
-        const pointsPerKg: Record<WasteType, number> = {
-            'plastique': 2,
-            'verre': 1,
-            'papier': 1,
-            'metal': 5
-        };
-        return (weight / 1000) * pointsPerKg[wasteType];
+    calculatePoints(wasteItems: WasteItem[]): number {
+        return wasteItems.reduce((total, item) => {
+            const rate = this.POINTS_RATES[item.type as keyof typeof this.POINTS_RATES];
+            return total + (rate * item.weight / 1000); // Convertir en kg
+        }, 0);
     }
 
     addPointsTransaction(userId: string, collectionRequestId: string, wasteType: WasteType, weight: number, isValidated: boolean): Observable<PointsTransaction> {
         if (!isValidated) {
             return throwError(() => new Error('Collection must be validated to award points'));
         }
-        const pointsEarned = this.calculatePoints(wasteType, weight);        
+        const pointsEarned = this.calculatePoints([{ type: wasteType, weight } as WasteItem]);        
         // Award points only if the collection is validated
         if (isValidated) {
             const transaction: PointsTransaction = {
@@ -106,7 +104,7 @@ export class PointsService {
         return of(earnedPoints - usedPoints);
     }
 
-    convertToVoucher(points: number): number {
+    convertPoints(points: number): number {
         if (points >= 500) return 350;
         if (points >= 200) return 120;
         if (points >= 100) return 50;

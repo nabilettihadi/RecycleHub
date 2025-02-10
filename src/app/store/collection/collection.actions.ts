@@ -43,3 +43,17 @@ export const deleteCollectionRequestSuccess = createAction(
 export const deleteCollectionRequestFailure = createAction(
   '[Collection] Delete Collection Request Failure',
   props<{ error: string }>());
+
+export const loadRequests = createAction(
+  '[Collection] Load Requests'
+);
+
+export const loadRequestsSuccess = createAction(
+  '[Collection] Load Requests Success',
+  props<{ requests: CollectionRequest[] }>()
+);
+
+export const loadRequestsFailure = createAction(
+  '[Collection] Load Requests Failure',
+  props<{ error: string }>()
+);

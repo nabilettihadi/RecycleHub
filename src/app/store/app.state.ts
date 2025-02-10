@@ -2,7 +2,8 @@ import { CollectionRequest } from '../models/collection-request.model'; // Adjus
 import { User } from '../models/user.model'; // Import User model
 import { AuthState } from './auth/auth.reducer';
 
-export interface CollectionState {
+// Exporter l'interface pour qu'elle soit accessible
+export interface CollectionStateModel {
   collectors: User[]; // Assuming User is imported from the correct path
   collectionRequests: CollectionRequest[]; // Assuming CollectionRequest is imported from the correct path
   currentRequest: CollectionRequest | null;
@@ -12,6 +13,6 @@ export interface CollectionState {
 
 export interface AppState {
     auth: AuthState;
-    collection: CollectionState;
+    collection: CollectionStateModel;
     // Add other slices of state as needed
 }

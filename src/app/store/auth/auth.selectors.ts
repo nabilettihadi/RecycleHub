@@ -33,3 +33,8 @@ export const selectAuthLoading = createSelector(
   selectAuthState,
   (state: AuthState) => state.loading
 );
+
+export const selectUserActiveRequests = createSelector(
+  selectAuthState,
+  (state: AuthState): string[] => state.user?.activeRequests || []
+);

@@ -4,6 +4,10 @@ import { FormBuilder, FormGroup, FormArray, Validators, ReactiveFormsModule, Abs
 import { Store } from '@ngrx/store';
 import { createCollectionRequest } from '../../store/collection/collection.actions';
 import { CollectionRequest } from '../../models/collection-request.model';
+import { selectUserActiveRequests } from '../../store/auth/auth.selectors';
+import { first } from 'rxjs/operators';
+import { Observable } from 'rxjs';
+import { AppState } from '../../store/app.state';
 
 @Component({
   selector: 'app-collection-request',
@@ -15,8 +19,9 @@ import { CollectionRequest } from '../../models/collection-request.model';
 export class CollectionRequestComponent implements OnInit {
   collectionRequestForm: FormGroup;
   errorMessage: string = '';
+  activeRequests$!: Observable<string[]>;
 
-  constructor(private fb: FormBuilder, private store: Store) {
+  constructor(private fb: FormBuilder, private store: Store<AppState>) {
     this.collectionRequestForm = this.fb.group({
       wasteItems: this.fb.array([]),
       collectionAddress: this.fb.group({
@@ -36,6 +41,7 @@ export class CollectionRequestComponent implements OnInit {
 
   ngOnInit(): void {
     this.addWasteItem();
+    this.activeRequests$ = this.store.select(selectUserActiveRequests);
   }
 
   get wasteItems(): FormArray {
@@ -160,5 +166,37 @@ export class CollectionRequestComponent implements OnInit {
       return false;
     }
     return true;
+  }
+
+  private validateRequest(): boolean {
+    let isValid = true;
+
+    // Utiliser first() pour obtenir la valeur actuelle de l'Observable
+    this.activeRequests$.pipe(
+      first()
+    ).subscribe(requests => {
+      if (requests.length >= 3) {
+        this.errorMessage = 'Vous ne pouvez pas avoir plus de 3 demandes actives';
+        isValid = false;
+      }
+    });
+
+    // Vérifier le poids total
+    const totalWeight = this.calculateTotalWeight();
+    if (totalWeight > 10000) { // 10kg en grammes
+      this.errorMessage = 'Le poids total ne peut pas dépasser 10kg';
+      return false;
+    }
+
+    // Vérifier le poids minimum par déchet
+    const invalidItems = this.wasteItems.controls.some(
+      item => item.get('weight')?.value < 1000
+    );
+    if (invalidItems) {
+      this.errorMessage = 'Chaque déchet doit peser au minimum 1kg';
+      return false;
+    }
+
+    return isValid;
   }
 }

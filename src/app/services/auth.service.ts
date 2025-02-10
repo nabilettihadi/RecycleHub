@@ -3,6 +3,8 @@ import { Observable, of, throwError } from 'rxjs';
 import { delay } from 'rxjs/operators';
 import { User } from '../models/user.model';
 import { LoginForm, RegisterForm } from '../models/auth.model';
+import { Collector } from '../models/auth.model';
+import { CollectionRequest } from '../models/collection-request.model';
 
 @Injectable({
   providedIn: 'root'
@@ -13,8 +15,8 @@ export class AuthService {
   private readonly COLLECTORS_KEY = 'collectors';
 
   constructor() {
-    this.initializeDefaultUsers();
-    this.initializeCollectors();
+    // En développement, réinitialiser le storage pour avoir des données fraîches
+    this.resetStorage();
   }
 
   private initializeDefaultUsers(): void {
@@ -43,25 +45,29 @@ export class AuthService {
   }
 
   private initializeCollectors() {
+    // Vérifier si les collecteurs existent déjà
     if (!localStorage.getItem(this.COLLECTORS_KEY)) {
-      const defaultCollectors = [
+      const defaultCollectors: Collector[] = [
         {
-          id: 'collector1',
+          id: '1',
           email: 'collector1@recyclehub.ma',
+          password: 'password123', // Mot de passe en clair pour le test
           firstName: 'Ahmed',
           lastName: 'Alami',
+          phoneNumber: '0600000001',
           userType: 'collector',
-          city: 'Casablanca'
-        },
-        {
-          id: 'collector2',
-          email: 'collector2@recyclehub.ma',
-          firstName: 'Karim',
-          lastName: 'Bennani',
-          userType: 'collector',
-          city: 'Rabat'
+          dateOfBirth: new Date('1990-01-01'),
+          address: {
+            street: '123 Rue Mohammed V',
+            city: 'Casablanca',
+            postalCode: '20000',
+            country: 'Maroc'
+          },
+          points: 0
         }
       ];
+
+      console.log('Initialisation des collecteurs:', defaultCollectors);
       localStorage.setItem(this.COLLECTORS_KEY, JSON.stringify(defaultCollectors));
     }
   }
@@ -91,25 +97,67 @@ export class AuthService {
     return of(newUser);
   }
 
-  login({ email, password }: LoginForm): Observable<User> {
-    const users = this.getUsers();
-    const user = users.find(u => u.email === email && u.password === password);
-
-    if (user) {
-      localStorage.setItem(this.CURRENT_USER_KEY, JSON.stringify(user));
-      return of(user).pipe(delay(1000)); // Simulate API delay
+  login(email: string, password: string): Observable<User> {
+    console.log('Tentative de connexion avec:', { email, password });
+    
+    // Vérifier d'abord dans les collecteurs
+    const collectors = JSON.parse(localStorage.getItem(this.COLLECTORS_KEY) || '[]') as Collector[];
+    console.log('Collecteurs trouvés:', collectors);
+    
+    // Vérification stricte des identifiants
+    const collector = collectors.find(c => {
+      const emailMatch = c.email.toLowerCase() === email.toLowerCase();
+      const passwordMatch = c.password === password;
+      console.log('Vérification:', { 
+        email, 
+        storedEmail: c.email, 
+        emailMatch,
+        passwordMatch 
+      });
+      return emailMatch && passwordMatch;
+    });
+    
+    console.log('Collecteur trouvé:', collector);
+    
+    if (collector) {
+      const userCollector: User = {
+        ...collector,
+        points: 0
+      };
+      console.log('Conversion en User:', userCollector);
+      localStorage.setItem(this.CURRENT_USER_KEY, JSON.stringify(userCollector));
+      return of(userCollector).pipe(delay(500));
     }
 
-    return throwError(() => new Error('Invalid email or password'));
+    // Sinon vérifier dans les particuliers
+    const users = JSON.parse(localStorage.getItem(this.USERS_KEY) || '[]') as User[];
+    const user = users.find((u: User) => u.email === email && u.password === password);
+
+    if (user) {
+      console.log('Utilisateur particulier trouvé:', user);
+      localStorage.setItem(this.CURRENT_USER_KEY, JSON.stringify(user));
+      return of(user).pipe(delay(500));
+    }
+
+    console.log('Aucun utilisateur trouvé');
+    return throwError(() => new Error('Identifiants invalides'));
   }
 
   logout(): void {
     localStorage.removeItem(this.CURRENT_USER_KEY);
   }
 
+  isAuthenticated(): boolean {
+    const isAuth = !!localStorage.getItem(this.CURRENT_USER_KEY);
+    console.log('État d\'authentification:', isAuth);
+    return isAuth;
+  }
+
   getCurrentUser(): User | null {
     const userJson = localStorage.getItem(this.CURRENT_USER_KEY);
-    return userJson ? JSON.parse(userJson) : null;
+    const user = userJson ? JSON.parse(userJson) : null;
+    console.log('Utilisateur actuel:', user);
+    return user;
   }
 
   updateProfile(userId: string, userData: Partial<User>): Observable<User> {
@@ -167,5 +215,23 @@ export class AuthService {
     }
     
     return age >= 18;
+  }
+
+  private initializeCollectionRequests() {
+    const COLLECTION_REQUESTS_KEY = 'collection_requests';
+    if (!localStorage.getItem(COLLECTION_REQUESTS_KEY)) {
+      const defaultRequests: CollectionRequest[] = [];
+      localStorage.setItem(COLLECTION_REQUESTS_KEY, JSON.stringify(defaultRequests));
+    }
+  }
+
+  resetStorage(): void {
+    localStorage.removeItem(this.COLLECTORS_KEY);
+    localStorage.removeItem(this.USERS_KEY);
+    localStorage.removeItem(this.CURRENT_USER_KEY);
+    this.initializeCollectors();
+    this.initializeDefaultUsers();
+    this.initializeCollectionRequests();
+    console.log('Storage réinitialisé');
   }
 }

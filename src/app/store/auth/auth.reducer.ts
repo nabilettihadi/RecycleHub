@@ -4,12 +4,16 @@ import * as AuthActions from './auth.actions';
 
 export interface AuthState {
   user: User | null;
+  userType: 'collector' | 'particular' | null;
+  isAuthenticated: boolean;
   loading: boolean;
   error: string | null;
 }
 
 export const initialState: AuthState = {
   user: null,
+  userType: null,
+  isAuthenticated: false,
   loading: false,
   error: null
 };
@@ -41,12 +45,17 @@ export const authReducer = createReducer(
     loading: true,
     error: null
   })),
-  on(AuthActions.loginSuccess, (state, { user }) => ({
-    ...state,
-    user,
-    loading: false,
-    error: null
-  })),
+  on(AuthActions.loginSuccess, (state, { user }) => {
+    console.log('Login Success - User:', user);
+    return {
+      ...state,
+      user,
+      userType: user.userType,
+      isAuthenticated: true,
+      loading: false,
+      error: null
+    };
+  }),
   on(AuthActions.loginFailure, (state, { error }) => ({
     ...state,
     loading: false,

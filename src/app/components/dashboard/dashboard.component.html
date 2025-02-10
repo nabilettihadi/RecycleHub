@@ -14,8 +14,8 @@
             <div class="flex items-center space-x-4">
               <!-- Photo de profil -->
               <div class="flex items-center space-x-3">
-                <img [src]="user.profilePicture || 'assets/default-avatar.png'"
-                     alt="Photo de profil"
+                <img [src]="user.profilePicture || defaultAvatarUrl"
+                     [alt]="user.firstName + ' ' + user.lastName"
                      class="h-10 w-10 rounded-full object-cover border-2 border-green-500">
                 <div class="flex flex-col">
                   <span class="text-sm font-medium text-gray-700">{{ user.firstName }} {{ user.lastName }}</span>

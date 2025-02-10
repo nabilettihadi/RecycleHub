@@ -6,6 +6,7 @@ import { selectCurrentUser } from '../../store/auth/auth.selectors';
 import { selectUserPendingRequests } from '../../store/collection/collection.selectors';
 import { logout } from '../../store/auth/auth.actions';
 import { map } from 'rxjs/operators';
+import { DEFAULT_AVATAR_URL } from '../../shared/constants';
 
 @Component({
   selector: 'app-dashboard',
@@ -35,6 +36,8 @@ export class DashboardComponent implements OnInit {
   recentRequests$ = this.pendingRequests$.pipe(
     map(requests => requests.slice(0, 5))
   );
+
+  defaultAvatarUrl = DEFAULT_AVATAR_URL;
 
   ngOnInit(): void {}
 

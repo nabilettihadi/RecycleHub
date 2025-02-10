@@ -3,7 +3,7 @@ import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angula
 import { CommonModule } from '@angular/common';
 import { Store } from '@ngrx/store';
 import { RouterLink } from '@angular/router';
-import { login } from '../../../store/auth/auth.actions';
+import * as AuthActions from '../../../store/auth/auth.actions';
 import { selectAuthState, selectIsAuthenticated } from '../../../store/auth/auth.selectors';
 
 @Component({
@@ -27,6 +27,12 @@ export class LoginComponent implements OnInit {
       email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required, Validators.minLength(6)]]
     });
+
+    // Pour le développement, pré-remplir les champs
+    this.loginForm.patchValue({
+      email: 'collector1@recyclehub.ma',
+      password: 'password123'
+    });
   }
 
   ngOnInit(): void {}
@@ -34,7 +40,8 @@ export class LoginComponent implements OnInit {
   onSubmit(): void {
     if (this.loginForm.valid) {
       const { email, password } = this.loginForm.value;
-      this.store.dispatch(login({ email, password }));
+      console.log('Tentative de connexion avec:', { email, password }); // Pour déboguer
+      this.store.dispatch(AuthActions.login({ email, password }));
     } else {
       Object.keys(this.loginForm.controls).forEach(key => {
         const control = this.loginForm.get(key);

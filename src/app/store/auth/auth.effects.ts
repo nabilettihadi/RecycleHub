@@ -15,10 +15,17 @@ export class AuthEffects {
   login$ = createEffect(() =>
     this.actions$.pipe(
       ofType(AuthActions.login),
+      tap(action => console.log('Login action dispatched:', action)),
       mergeMap(({ email, password }) =>
-        this.authService.login({ email, password }).pipe(
-          map(user => AuthActions.loginSuccess({ user })),
-          catchError(error => of(AuthActions.loginFailure({ error: error.message })))
+        this.authService.login(email, password).pipe(
+          map(user => {
+            console.log('Login successful:', user);
+            return AuthActions.loginSuccess({ user });
+          }),
+          catchError(error => {
+            console.error('Login failed:', error);
+            return of(AuthActions.loginFailure({ error: error.message }));
+          })
         )
       )
     )
@@ -28,7 +35,14 @@ export class AuthEffects {
     () =>
       this.actions$.pipe(
         ofType(AuthActions.loginSuccess),
-        tap(() => this.router.navigate(['/dashboard']))
+        tap(({ user }) => {
+          console.log('Redirecting after login success. User type:', user.userType);
+          if (user.userType === 'collector') {
+            this.router.navigate(['/collector-dashboard']);
+          } else {
+            this.router.navigate(['/dashboard']);
+          }
+        })
       ),
     { dispatch: false }
   );

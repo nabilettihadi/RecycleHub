@@ -8,10 +8,16 @@ export interface User {
     password: string;
     firstName: string;
     lastName: string;
-    address: Address;
+    address: {
+        street: string;
+        city: string;
+        postalCode: string;
+        country: string;
+    };
     phoneNumber: string;
     dateOfBirth: Date;
     profilePicture?: string;
     userType: UserType;
     points: number;
+    activeRequests?: string[];
 }

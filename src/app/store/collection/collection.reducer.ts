@@ -1,16 +1,8 @@
 import { createReducer, on } from '@ngrx/store';
-import { User } from '../../models/user.model';
-import { CollectionRequest } from '../../models/collection-request.model';
+import { CollectionStateModel } from '../app.state';
+import * as CollectionActions from './collection.actions';
 
-export interface CollectionState {
-  collectors: User[];
-  collectionRequests: CollectionRequest[];
-  currentRequest: CollectionRequest | null;
-  loading: boolean;
-  error: string | null;
-}
-
-export const initialState: CollectionState = {
+export const initialState: CollectionStateModel = {
   collectors: [],
   collectionRequests: [],
   currentRequest: null,
@@ -20,5 +12,19 @@ export const initialState: CollectionState = {
 
 export const collectionReducer = createReducer(
   initialState,
-  // définir vos reducers ici...
+  on(CollectionActions.loadRequests, state => ({
+    ...state,
+    loading: true,
+    error: null
+  })),
+  on(CollectionActions.loadRequestsSuccess, (state, { requests }) => ({
+    ...state,
+    collectionRequests: requests,
+    loading: false
+  })),
+  on(CollectionActions.loadRequestsFailure, (state, { error }) => ({
+    ...state,
+    loading: false,
+    error
+  }))
 ); 

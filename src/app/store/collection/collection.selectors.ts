@@ -1,21 +1,20 @@
 import { createFeatureSelector, createSelector } from '@ngrx/store';
-import { AppState } from '../app.state';
+import { AppState, CollectionStateModel } from '../app.state';
 import { CollectionRequest } from '../../models/collection-request.model';
 import { User } from '../../models/user.model';
 import { selectCurrentUser } from '../auth/auth.selectors';
-import { CollectionState } from './collection.reducer';
 
-export const selectCollectionState = createFeatureSelector<CollectionState>('collection');
+export const selectCollectionState = createFeatureSelector<CollectionStateModel>('collection');
 
 export const selectAllRequests = createSelector(
   selectCollectionState,
-  (state) => state.collectionRequests
+  (state: CollectionStateModel) => state?.collectionRequests || []
 );
 
 export const selectRequestsByCollectorCity = createSelector(
   selectAllRequests,
   selectCurrentUser,
-  (requests: CollectionRequest[], user: User | null) => {
+  (requests, user) => {
     if (!user || user.userType !== 'collector') return [];
     return requests.filter(request => 
       request.collectionAddress.city.toLowerCase() === user.address.city.toLowerCase()
@@ -27,7 +26,7 @@ export const selectRequestsByCollectorCity = createSelector(
 export const selectUserPendingRequests = createSelector(
   selectAllRequests,
   selectCurrentUser,
-  (requests: CollectionRequest[], user: User | null) => {
+  (requests, user) => {
     if (!user) return [];
     return requests.filter(request => 
       request.userId === user.id && 
@@ -45,4 +44,9 @@ export const selectCurrentRequest = createSelector(
 export const selectCollectors = createSelector(
   selectCollectionState,
   (state) => state.collectors
+);
+
+export const selectCollectionRequests = createSelector(
+  selectCollectionState,
+  (state) => state.collectionRequests
 );

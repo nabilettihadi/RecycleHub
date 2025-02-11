@@ -1,0 +1,6 @@
+<div class="w-full h-screen bg-primary-b flex items-center justify-center relative ">
+    <app-home-layout></app-home-layout>
+    @if (shownAuthPopup$ | async) {
+        <app-auth-popup></app-auth-popup>
+    }
+</div>

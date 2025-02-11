@@ -1,0 +1,22 @@
+<div class="absolute w-full h-[100vh] flex items-center justify-center bg-black bg-opacity-65 z-50 " (click)="closePopup()">
+    <div class="bg-white w-[50%] min-h-[60vh] rounded-3xl flex" (click)="$event.stopPropagation()">
+        <div class="w-[50%] p-8 bg-black rounded-l-3xl">
+            <div class="flex flex-col gap-6">
+                <h2 class="text-gray-400 uppercase font-semibold text-[.95rem]">Start For Free</h2>
+                <div class="flex flex-col gap-2 font-bold text-white">
+                    <h1 class="text-3xl">{{ (activeAuthForm$ | async) == "register" ? "Create" : "Sign To"}}</h1>            
+                    <h1 class="text-3xl">Your Account</h1>
+                </div>
+                <p class="text-[.9rem] font-medium text-white"> {{ (activeAuthForm$ | async) == "register" ? "Already a member ?" : "Doesn't have an account yet ?" }} <span class="text-primary-green font-semibold underline cursor-pointer hover:opacity-70 hover:duration-500" (click)="handleSwitchingForms()">{{ (activeAuthForm$ | async) == "register" ? "Sign In ?" : "Sign Up" }}</span></p>
+               @if ((activeAuthForm$ | async) == "login") {
+                <app-login-form></app-login-form>
+               }@else {
+                <app-regisration-form></app-regisration-form>
+               }
+            </div>
+        </div>
+        <div class="w-[50%] bg-[#23C95A] bg-opacity-25 flex items-center justify-center rounded-r-3xl ">
+            <img src="assets/images/auth-img.gif" class="w-[60%] h-[50%]" alt="">
+        </div>
+    </div>
+</div> 

@@ -1,26 +1,24 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { User } from './models/user.model';
-import { loginSuccess } from './store/auth/auth.actions';
+import { AuthService } from './core/auth/service/auth.service';
+import { loginSuccess } from './modules/auth/state/auth.actions';
+import { User } from './shared/models';
 
 @Component({
   selector: 'app-root',
-  standalone: true,
   imports: [RouterOutlet],
-  template: '<router-outlet></router-outlet>'
+  templateUrl: './app.component.html',
+  styleUrl: './app.component.css'
 })
-export class AppComponent implements OnInit {
-  title = 'RecycleHub';
-
+export class AppComponent implements OnInit{
   private store = inject(Store);
-
-  ngOnInit() {
-    const userJson = localStorage.getItem('currentUser');
-    if (userJson) {
-      const user: User = JSON.parse(userJson);
-      this.store.dispatch(loginSuccess({ user }));
+  private authService = inject(AuthService);
+  
+  ngOnInit(): void {
+    const user : User | null = this.authService.getLoggedInUser();
+    if (user) {
+      this.store.dispatch(loginSuccess({user : user}));
     }
-    
   }
 }

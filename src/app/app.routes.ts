@@ -1,51 +1,59 @@
 import { Routes } from '@angular/router';
-import { LoginComponent } from './components/auth/login/login.component';
-import { RegisterComponent } from './components/auth/register/register.component';
-import { authGuard } from './guards/auth.guard';
-import { ProfileComponent } from './components/profile/profile.component';
-import { collectorGuard } from './guards/collector.guard';
+import { HomePageComponent } from './modules/home/home-page/home-page.component';
+import { RoleGuard } from './core/guards/role.guard';
+import { CollectorLayoutComponent } from './modules/collector/layouts/collector-layout/collector-layout.component';
+import { UserLayoutComponent } from './modules/user/layouts/user-layout/user-layout.component';
 
 export const routes: Routes = [
-  { path: '', redirectTo: '/home', pathMatch: 'full' },
-  { path: 'login', component: LoginComponent },
-  { path: 'register', component: RegisterComponent },
-  { 
-    path: 'collector-dashboard',
-    loadComponent: () => import('./components/collector-dashboard/collector-dashboard.component')
-      .then(m => m.CollectorDashboardComponent),
-    canActivate: [authGuard, collectorGuard]
-  },
-  { 
-    path: 'home',
-    loadComponent: () => import('./components/home/home.component').then(m => m.HomeComponent)
-  },
-  {
-    path: 'collection-request',
-    loadComponent: () => import('./components/collection-request/collection-request.component')
-      .then(m => m.CollectionRequestComponent),
-    canActivate: [authGuard]
-  },
-  {
-    path: 'dashboard',
-    loadComponent: () => import('./components/dashboard/dashboard.component')
-      .then(m => m.DashboardComponent),
-    canActivate: [authGuard]
-  },
-  {
-    path: 'profile',
-    component: ProfileComponent,
-    canActivate: [authGuard]
-  },
-  {
-    path: 'points',
-    loadComponent: () => import('./components/points/points.component')
-      .then(m => m.PointsComponent),
-    canActivate: [authGuard]
-  },
-  {
-    path: 'collector-profile',
-    loadComponent: () => import('./components/collector-profile/collector-profile.component')
-      .then(m => m.CollectorProfileComponent),
-    canActivate: [authGuard, collectorGuard]
-  }
-];
+    {
+      path: '',
+      component: HomePageComponent,
+    },
+    {
+      path: 'user',
+      component: UserLayoutComponent,
+      canActivate: [RoleGuard],
+      data: { role: 'user' },
+      children: [
+        {
+          path: 'requests',
+          loadChildren: () =>
+            import('./modules/user/user.routes').then((m) => m.USER_ROUTES),
+        },
+        {
+          path: 'profile',
+          loadComponent: () =>
+            import('./shared/reactive-components/profile/profile.component').then(
+              (m) => m.ProfileComponent
+            ),
+        },
+        {
+          path: 'points',
+          loadComponent: () => import('./modules/user/components/points-conversion/points-conversion.component').then(m => m.PointsConversionComponent)
+        }
+      ],
+    },
+    {
+      path: 'collector',
+      component: CollectorLayoutComponent,
+      canActivate: [RoleGuard],
+      data: { role: 'collector' },
+      children: [
+        {
+          path: 'dashboard',
+          loadChildren: () =>
+            import('./modules/collector/collector.routes').then(
+              (m) => m.COLLECTOR_ROUTES
+            ),
+        },
+        {
+          path: 'profile',
+          loadComponent: () =>
+            import('./shared/reactive-components/profile/profile.component').then(
+              (m) => m.ProfileComponent
+            ),
+        },
+      ],
+    },
+  ];
+  

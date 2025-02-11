@@ -43,7 +43,8 @@ export class CollectionRequestComponent implements OnInit {
       }),
       collectionDate: ['', [Validators.required]],
       timeSlot: ['', [Validators.required]],
-      notes: ['', Validators.maxLength(500)]
+      notes: ['', Validators.maxLength(500)],
+      totalWeight: [0, [Validators.required, Validators.max(10000)]]
     });
   }
 
@@ -57,17 +58,25 @@ export class CollectionRequestComponent implements OnInit {
 
   addWasteItem(): void {
     const item = this.fb.group({
+      weight: ['', [Validators.required, Validators.min(1000), Validators.max(10000)]],
       type: ['', Validators.required],
-      weight: ['', [Validators.required, Validators.min(1000)]],
       photos: [[]]
     });
     this.wasteItems.push(item);
+    this.updateTotalWeight();
   }
 
   removeWasteItem(index: number): void {
     if (this.wasteItems.length > 1) {
       this.wasteItems.removeAt(index);
     }
+  }
+
+  updateTotalWeight(): void {
+    const totalWeight = this.wasteItems.controls.reduce((total, item) => {
+      return total + (item.get('weight')?.value || 0);
+    }, 0);
+    this.collectionRequestForm.get('totalWeight')?.setValue(totalWeight);
   }
 
   onSubmit(): void {
@@ -119,6 +128,7 @@ export class CollectionRequestComponent implements OnInit {
         }
       });
     } else {
+      this.updateTotalWeight();
       this.markFormGroupTouched(this.collectionRequestForm);
     }
   }

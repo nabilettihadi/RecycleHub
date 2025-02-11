@@ -1,11 +1,13 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { CollectionRequest, WasteType, RequestStatus } from '../models/collection-request.model';
+import { PointsService } from './points.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class CollectionRequestService {
   private readonly COLLECTION_REQUESTS_KEY = 'collection_requests';
+  private pointsService = inject(PointsService);
 
   constructor() {}
 
@@ -25,6 +27,11 @@ export class CollectionRequestService {
   }
 
   createRequest(formData: any, userId: string): CollectionRequest {
+    const userRequests = this.getUserRequests(userId);
+    if (userRequests.length >= 3) {
+      throw new Error('Vous ne pouvez pas avoir plus de 3 demandes simultanées.');
+    }
+
     const request: CollectionRequest = {
       id: crypto.randomUUID(),
       userId,
@@ -46,6 +53,10 @@ export class CollectionRequestService {
       updatedAt: new Date(),
       totalWeight: formData.wasteItems.reduce((total: number, item: any) => total + Number(item.weight), 0)
     };
+
+    if (request.totalWeight > 10000) {
+      throw new Error('Le poids total ne peut pas dépasser 10kg');
+    }
 
     const requests = this.getCollectionRequests();
     requests.push(request);
@@ -97,34 +108,46 @@ export class CollectionRequestService {
     }
   }
 
+  deleteRequest(requestId: string): void {
+    const requests = this.getCollectionRequests();
+    const updatedRequests = requests.filter(r => r.id !== requestId);
+    this.saveRequests(updatedRequests);
+  }
+
   validateCollection(requestId: string): void {
+
     const requests = this.getCollectionRequests();
     const index = requests.findIndex(r => r.id === requestId);
+    
     if (index !== -1) {
+      const request = requests[index];
+      
+      // Mettre à jour le statut de la demande
       requests[index] = {
-        ...requests[index],
+        ...request,
         status: 'validee' as RequestStatus,
         updatedAt: new Date()
       };
+      
       this.saveRequests(requests);
       
-      this.calculateAndAssignPoints(requests[index]);
+      // Attribuer les points au propriétaire de la demande
+      request.wasteItems.forEach(item => {
+        this.pointsService.addPointsTransaction(
+          request.userId,
+          request.id,
+          item.type as WasteType,
+          item.weight,
+          true
+        ).subscribe({
+          next: (transaction) => {
+            console.log(`Points attribués avec succès: ${transaction.pointsEarned}`);
+          },
+          error: (error) => {
+            console.error('Erreur lors de l\'attribution des points:', error);
+          }
+        });
+      });
     }
-  }
-
-  private calculateAndAssignPoints(request: CollectionRequest): void {
-    const pointsPerKg = {
-      'plastique': 2,
-      'verre': 1,
-      'papier': 1,
-      'metal': 5
-    };
-
-    const totalPoints = request.wasteItems.reduce((total, item) => {
-      return total + (pointsPerKg[item.type as keyof typeof pointsPerKg] * item.weight / 1000);
-    }, 0);
-
-    // Ici, vous devriez appeler un service pour mettre à jour les points de l'utilisateur
-    console.log(`Points attribués à l'utilisateur ${request.userId}: ${totalPoints}`);
   }
 }

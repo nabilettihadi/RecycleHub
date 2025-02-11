@@ -59,30 +59,14 @@ export class PointsService {
 
     addPointsTransaction(userId: string, collectionRequestId: string, wasteType: WasteType, weight: number, isValidated: boolean): Observable<PointsTransaction> {
         if (!isValidated) {
-            return throwError(() => new Error('Collection must be validated to award points'));
+            return throwError(() => new Error('La collecte doit être validée pour attribuer des points'));
         }
-        const pointsEarned = this.calculatePoints(wasteType, weight);        
-        // Award points only if the collection is validated
-        if (isValidated) {
-            const transaction: PointsTransaction = {
-                id: Date.now().toString(),
-                userId,
-                collectionRequestId,
-                wasteType,
-                weight,
-                pointsEarned,
-                createdAt: new Date()
-            };
-            
-            const transactions = this.getTransactions();
-            transactions.push(transaction);
-            localStorage.setItem(this.TRANSACTIONS_KEY, JSON.stringify(transactions));
 
-            return of(transaction);
-        }
-        
+        const pointsPerKg = POINTS_RATES[wasteType] || 0;
+        const pointsEarned = Math.floor((weight / 1000) * pointsPerKg);
+
         const transaction: PointsTransaction = {
-            id: Date.now().toString(),
+            id: crypto.randomUUID(),
             userId,
             collectionRequestId,
             wasteType,
@@ -118,26 +102,23 @@ export class PointsService {
         return 0;
     }
 
-    convertPointsToVoucher(userId: string, points: number): Observable<Voucher> {        
-        if (points < 100) {
-            return throwError(() => new Error('Minimum 100 points required for voucher conversion'));
-        }
-        const voucherRate = VOUCHER_RATES.find(rate => rate.points === points);
+    convertPointsToVoucher(userId: string, pointsToConvert: number): Observable<Voucher> {
+        const voucherRate = VOUCHER_RATES.find(rate => rate.points === pointsToConvert);
         
         if (!voucherRate) {
-            return throwError(() => new Error('Invalid points amount for voucher conversion'));
+            return throwError(() => new Error('Montant de points invalide pour la conversion'));
         }
 
         return this.getUserPoints(userId).pipe(
             map(availablePoints => {
-                if (availablePoints < points) {
-                    throw new Error('Insufficient points');
+                if (availablePoints < pointsToConvert) {
+                    throw new Error('Points insuffisants');
                 }
 
                 const voucher: Voucher = {
-                    id: Date.now().toString(),
+                    id: crypto.randomUUID(),
                     userId,
-                    points: voucherRate.points,
+                    points: pointsToConvert,
                     value: voucherRate.value,
                     createdAt: new Date(),
                     status: 'pending'

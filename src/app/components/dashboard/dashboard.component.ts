@@ -12,7 +12,7 @@ import { AppState } from '../../store/app.state';
 import { CollectionRequest } from '../../models/collection-request.model';
 import { CollectionRequestService } from '../../services/collection-request.service';
 import { Observable, of } from 'rxjs';
-
+import { deleteCollectionRequest } from '../../store/collection/collection.actions';
 @Component({
   selector: 'app-dashboard',
   standalone: true,
@@ -33,12 +33,14 @@ export class DashboardComponent implements OnInit {
   defaultAvatarUrl = DEFAULT_AVATAR_URL;
 
   ngOnInit(): void {
+    this.loadRequests();
+  }
+
+  loadRequests(): void {
     this.currentUser$.subscribe(user => {
       if (user) {
-        // Récupérer les requêtes de l'utilisateur
         this.requests = this.collectionService.getUserRequests(user.id);
         
-        // Mettre à jour les observables
         this.updateObservables();
       }
     });
@@ -80,7 +82,7 @@ export class DashboardComponent implements OnInit {
   }
 
   onDeleteRequest(requestId: string): void {
-    // Implémenter la logique de suppression
-    console.log('Suppression de la requête:', requestId);
+    this.store.dispatch(deleteCollectionRequest({ requestId }));
+    this.loadRequests();
   }
 }

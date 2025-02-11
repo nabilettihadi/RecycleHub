@@ -20,6 +20,12 @@ export class CollectionService {
     return of(request);
   }
 
+  deleteRequest(requestId: string): void {
+    const requests = this.getStoredRequests();
+    const updatedRequests = requests.filter(r => r.id !== requestId);
+    this.saveRequests(updatedRequests);
+  }
+
   private getStoredRequests(): CollectionRequest[] {
     return JSON.parse(localStorage.getItem(this.COLLECTION_REQUESTS_KEY) || '[]');
   }

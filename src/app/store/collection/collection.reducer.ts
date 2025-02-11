@@ -26,5 +26,9 @@ export const collectionReducer = createReducer(
     ...state,
     error,
     loading: false
+  })),
+  on(CollectionActions.deleteCollectionRequestSuccess, (state, { requestId }) => ({
+    ...state,
+    collectionRequests: state.collectionRequests.filter(request => request.id !== requestId)
   }))
 ); 

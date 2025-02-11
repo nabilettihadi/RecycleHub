@@ -4,11 +4,13 @@ import { of } from 'rxjs';
 import { map, mergeMap, catchError } from 'rxjs/operators';
 import * as CollectionActions from './collection.actions';
 import { CollectionService } from '../../services/collection.service';
+import { CollectionRequestService } from '../../services/collection-request.service';
 
 @Injectable()
 export class CollectionEffects {
   private actions$ = inject(Actions);
   private collectionService = inject(CollectionService);
+  private collectionRequestService = inject(CollectionRequestService);
 
   loadRequests$ = createEffect(() =>
     this.actions$.pipe(
@@ -34,5 +36,14 @@ export class CollectionEffects {
     )
   );
 
-  // Ajoutez d'autres effets si nécessaire pour update et delete
+  deleteRequest$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(CollectionActions.deleteCollectionRequest),
+      mergeMap(({ requestId }) => {
+        this.collectionRequestService.deleteRequest(requestId);
+        return of(CollectionActions.deleteCollectionRequestSuccess({ requestId }));
+      }),
+      catchError(error => of(CollectionActions.deleteCollectionRequestFailure({ error: error.message })))
+    )
+  );
 } 
